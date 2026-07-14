@@ -1,12 +1,10 @@
 "use client"
 
+import Link from "next/link"
 import { useMemo, useState, useSyncExternalStore } from "react"
-import { ArrowUpRight, Clock3, Plane, Shield } from "lucide-react"
+import { ArrowRight, ArrowUpRight, CalendarDays, Moon, Newspaper, Plane, Shield, Sun } from "lucide-react"
 
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Separator } from "@/components/ui/separator"
 import { Switch } from "@/components/ui/switch"
 import type { Story, StoryCategory } from "@/lib/stories"
 
@@ -60,129 +58,125 @@ export function NewsFeed({ stories }: { stories: Story[] }) {
 
   return (
     <>
-      <section className="border-y bg-muted/35">
-        <div className="mx-auto flex max-w-6xl flex-col gap-4 px-4 py-4 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-8">
-          <nav aria-label="News categories" className="flex gap-1 overflow-x-auto pb-1 lg:pb-0">
+      <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-5 px-4 py-5 sm:px-6 lg:px-8">
+        <label className="flex items-center gap-3">
+          <span className="text-xs font-bold uppercase tracking-[0.12em] text-muted-foreground">Topic</span>
+          <select
+            value={category}
+            onChange={(event) => setCategory(event.target.value as (typeof categories)[number])}
+            className="cursor-pointer border-0 border-b border-foreground/25 bg-transparent py-1 pr-8 font-serif text-lg font-bold outline-none focus:border-foreground"
+          >
             {categories.map((item) => (
-              <Button
-                key={item}
-                type="button"
-                variant={category === item ? "default" : "ghost"}
-                size="sm"
-                className="shrink-0"
-                onClick={() => setCategory(item)}
-              >
-                {item}
-              </Button>
+              <option key={item}>{item}</option>
             ))}
-          </nav>
+          </select>
+        </label>
 
-          <div className="flex items-center justify-between gap-3 rounded-lg border bg-background px-3 py-2 lg:justify-start">
-            <div className="flex items-center gap-2">
-              <Shield className="size-4 text-muted-foreground" aria-hidden="true" />
-              <label htmlFor="military-news" className="text-sm font-medium">
-                Show military news
-              </label>
-            </div>
-            <Switch
-              id="military-news"
-              checked={showMilitary}
-              onCheckedChange={toggleMilitary}
-              aria-label="Show military news"
-            />
-          </div>
+        <div className="flex items-center gap-3">
+          <label htmlFor="military-news" className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.1em] text-muted-foreground">
+            <Shield className="size-4" aria-hidden="true" />
+            Military news
+          </label>
+          <Switch
+            id="military-news"
+            checked={showMilitary}
+            onCheckedChange={toggleMilitary}
+            className="data-checked:bg-foreground"
+            aria-label="Show military news"
+          />
         </div>
-      </section>
+      </div>
 
-      <main className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
+      <main id="briefing" className="mx-auto w-full max-w-7xl px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
         {!lead ? (
-          <div className="rounded-xl border border-dashed px-6 py-16 text-center">
-            <p className="font-medium">No stories in this category today.</p>
-            <Button className="mt-4" variant="outline" onClick={() => setCategory("All")}>
-              View all news
+          <div className="border border-dashed border-foreground/30 px-6 py-20 text-center">
+            <p className="font-serif text-2xl font-bold">No stories in this category today.</p>
+            <Button className="mt-5" variant="outline" onClick={() => setCategory("All")}>
+              View the full briefing
             </Button>
           </div>
         ) : (
           <>
-            <section aria-labelledby="lead-story" className="grid gap-6 lg:grid-cols-[1.15fr_0.85fr]">
-              <div className="flex min-h-72 flex-col justify-between overflow-hidden rounded-xl bg-primary p-6 text-primary-foreground shadow-sm sm:p-8">
-                <div className="flex items-start justify-between">
-                  <Badge className="bg-white/15 text-white hover:bg-white/15">Lead story</Badge>
-                  <Plane className="size-8 opacity-85" aria-hidden="true" />
+            <section aria-labelledby="lead-story" className="grid border-y-2 border-foreground lg:grid-cols-[minmax(0,1.3fr)_minmax(20rem,0.7fr)]">
+              <article className="relative flex min-h-[32rem] flex-col justify-between overflow-hidden bg-foreground p-6 text-background sm:p-10 lg:p-12">
+                {lead.imageUrl ? (
+                  <>
+                    <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url("${lead.imageUrl}")` }} />
+                    <div className="absolute inset-0 bg-black/65" />
+                  </>
+                ) : (
+                  <Plane className="absolute -right-10 top-4 size-64 -rotate-12 text-background/[0.035]" strokeWidth={1} aria-hidden="true" />
+                )}
+                <div className="relative">
+                  <p className="text-xs font-bold uppercase tracking-[0.2em] text-primary">Lead story</p>
                 </div>
-                <div className="mt-16">
-                  <p className="mb-3 text-sm font-medium text-white/75">{lead.category}</p>
-                  <h2 id="lead-story" className="max-w-2xl text-3xl font-semibold tracking-tight text-balance sm:text-4xl">
+                <div className="relative max-w-3xl">
+                  <p className="mb-4 text-xs font-bold uppercase tracking-[0.18em] text-background/55">{lead.category}</p>
+                  <h2 id="lead-story" className="font-serif text-4xl leading-[1.02] font-bold tracking-[-0.035em] text-balance sm:text-6xl">
                     {lead.headline}
                   </h2>
-                  <p className="mt-4 max-w-2xl text-base leading-7 text-white/80">{lead.summary}</p>
+                  <p className="mt-6 max-w-2xl text-lg leading-8 text-background/70">{lead.summary}</p>
                 </div>
-              </div>
+              </article>
 
-              <Card className="justify-between shadow-sm">
-                <CardHeader>
-                  <div className="flex items-center justify-between gap-4">
-                    <Badge variant="secondary">Today&apos;s TLDR</Badge>
-                    <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                      <Clock3 className="size-3.5" aria-hidden="true" />
-                      {lead.publishedAt}
-                    </span>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-5">
+              <aside className="flex flex-col bg-card p-6 sm:p-10 lg:p-12">
+                <div className="flex items-center justify-between border-b border-foreground/15 pb-4">
+                  <p className="text-xs font-bold uppercase tracking-[0.18em]">The short version</p>
+                  <span className="font-mono text-xs text-muted-foreground">01</span>
+                </div>
+                <div className="flex flex-1 flex-col justify-center gap-8 py-10">
                   <StoryPoint label="What happened" text={lead.whatHappened} />
-                  <Separator />
                   <StoryPoint label="Why it matters" text={lead.whyItMatters} />
-                </CardContent>
-                <div className="flex items-center justify-between border-t bg-muted/35 px-4 py-3">
-                  <span className="text-xs text-muted-foreground">Source: {lead.source}</span>
+                </div>
+                <div className="flex flex-wrap items-center justify-between gap-3 border-t border-foreground/15 pt-5">
+                  <StoryMeta story={lead} />
                   <SourceLink story={lead} />
                 </div>
-              </Card>
+              </aside>
             </section>
 
             {rest.length > 0 && (
-              <section aria-labelledby="latest-news" className="mt-12">
-                <div className="mb-5 flex items-end justify-between gap-4">
+              <section aria-labelledby="latest-news" className="mt-16">
+                <div className="mb-7 flex items-end justify-between gap-4 border-b-2 border-foreground pb-4">
                   <div>
-                    <p className="text-sm font-medium text-primary">The daily brief</p>
-                    <h2 id="latest-news" className="mt-1 text-2xl font-semibold tracking-tight">
-                      More worth knowing
+                    <p className="text-xs font-bold uppercase tracking-[0.18em] text-primary">Also in today&apos;s edition</p>
+                    <h2 id="latest-news" className="mt-2 font-serif text-3xl font-bold tracking-[-0.03em] sm:text-4xl">
+                      The rest of the briefing
                     </h2>
                   </div>
-                  <p className="hidden text-sm text-muted-foreground sm:block">
-                    {visibleStories.length} stories · updated daily
-                  </p>
+                  <div className="flex flex-col items-end gap-2">
+                    <p className="hidden text-xs font-bold uppercase tracking-[0.12em] text-muted-foreground sm:block">
+                      {visibleStories.length} stories · updated daily
+                    </p>
+                    <Link
+                      href="/stories"
+                      className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-[0.1em] text-primary hover:underline"
+                    >
+                      See all stories
+                      <ArrowRight className="size-3.5" aria-hidden="true" />
+                    </Link>
+                  </div>
                 </div>
 
-                <div className="grid gap-4 md:grid-cols-2">
-                  {rest.map((story, index) => (
-                    <Card key={story.id} className="transition-transform hover:-translate-y-0.5 hover:shadow-md">
-                      <CardHeader>
-                        <div className="mb-3 flex items-center justify-between gap-3">
-                          <Badge variant={story.category === "Military" ? "destructive" : "secondary"}>
-                            {story.category}
-                          </Badge>
-                          <span className="font-mono text-xs text-muted-foreground">
-                            {String(index + 2).padStart(2, "0")}
-                          </span>
-                        </div>
-                        <CardTitle className="text-xl tracking-tight">{story.headline}</CardTitle>
-                      </CardHeader>
-                      <CardContent className="flex flex-1 flex-col">
-                        <p className="leading-6 text-muted-foreground">{story.summary}</p>
-                        <div className="mt-5 space-y-3 rounded-lg bg-muted/60 p-4">
-                          <StoryPoint label="What happened" text={story.whatHappened} compact />
-                          <StoryPoint label="Why it matters" text={story.whyItMatters} compact />
-                        </div>
-                        <div className="mt-auto flex items-center justify-between gap-3 pt-5">
-                          <span className="text-xs text-muted-foreground">
-                            {story.source} · {story.publishedAt}
-                          </span>
-                          <SourceLink story={story} />
-                        </div>
-                      </CardContent>
-                    </Card>
+                <div className="grid gap-px bg-foreground/15 border border-foreground/15 md:grid-cols-2 xl:grid-cols-3">
+                  {rest.map((story) => (
+                    <article key={story.id} className="group flex min-h-[29rem] flex-col bg-card p-6 transition-colors hover:bg-secondary sm:p-7">
+                      <div>
+                        <span className="text-[0.68rem] font-bold uppercase tracking-[0.18em] text-primary">{story.category}</span>
+                      </div>
+                      <h3 className="mt-8 font-serif text-2xl leading-tight font-bold tracking-[-0.025em] group-hover:text-primary sm:text-3xl">
+                        {story.headline}
+                      </h3>
+                      <p className="mt-4 leading-7 text-muted-foreground">{story.summary}</p>
+                      <div className="mt-8 space-y-6 border-t border-foreground/15 pt-6">
+                        <StoryPoint label="What happened" text={story.whatHappened} compact />
+                        <StoryPoint label="Why it matters" text={story.whyItMatters} compact />
+                      </div>
+                      <div className="mt-auto flex flex-wrap items-center justify-between gap-3 pt-8">
+                        <StoryMeta story={story} />
+                        <SourceLink story={story} compact />
+                      </div>
+                    </article>
                   ))}
                 </div>
               </section>
@@ -194,24 +188,61 @@ export function NewsFeed({ stories }: { stories: Story[] }) {
   )
 }
 
+export function ThemeToggle() {
+  const [dark, setDark] = useState(false)
+
+  function toggleTheme() {
+    const next = !document.documentElement.classList.contains("dark")
+    document.documentElement.classList.toggle("dark", next)
+    setDark(next)
+  }
+
+  return (
+    <button
+      type="button"
+      aria-pressed={dark}
+      onClick={toggleTheme}
+      className="inline-flex items-center gap-2 border border-background/25 px-3 py-2 font-bold uppercase tracking-[0.1em] text-background/70 transition-colors hover:bg-background hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-background"
+    >
+      {dark ? <Sun className="size-4" aria-hidden="true" /> : <Moon className="size-4" aria-hidden="true" />}
+      {dark ? "Light theme" : "Dark theme"}
+    </button>
+  )
+}
+
 function StoryPoint({ label, text, compact = false }: { label: string; text: string; compact?: boolean }) {
   return (
-    <div className={compact ? "grid gap-1 sm:grid-cols-[7.25rem_1fr]" : "space-y-1.5"}>
-      <p className="text-xs font-semibold uppercase tracking-wider text-primary">{label}</p>
-      <p className={compact ? "text-sm leading-5" : "leading-6 text-muted-foreground"}>{text}</p>
+    <div>
+      <p className="mb-2 text-[0.68rem] font-bold uppercase tracking-[0.16em] text-primary">{label}</p>
+      <p className={compact ? "text-sm leading-6 text-foreground/80" : "text-base leading-7 text-muted-foreground"}>{text}</p>
     </div>
   )
 }
 
-function SourceLink({ story }: { story: Story }) {
+export function StoryMeta({ story }: { story: Story }) {
+  return (
+    <div className="flex flex-wrap items-center gap-2">
+      <span className="inline-flex items-center gap-1.5 rounded-full bg-secondary px-2.5 py-1 text-xs font-semibold text-muted-foreground ring-1 ring-foreground/10">
+        <Newspaper className="size-3.5 text-primary" aria-hidden="true" />
+        {story.source}
+      </span>
+      <span className="inline-flex items-center gap-1.5 rounded-full bg-secondary px-2.5 py-1 text-xs font-semibold text-muted-foreground ring-1 ring-foreground/10">
+        <CalendarDays className="size-3.5 text-primary" aria-hidden="true" />
+        {story.publishedAt}
+      </span>
+    </div>
+  )
+}
+
+export function SourceLink({ story, compact = false }: { story: Story; compact?: boolean }) {
   return (
     <a
       href={story.url}
       target="_blank"
       rel="noreferrer"
-      className="inline-flex items-center gap-1 text-sm font-medium text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-[0.1em] text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
     >
-      Read source
+      {compact ? "Source" : "Read source"}
       <ArrowUpRight className="size-3.5" aria-hidden="true" />
       <span className="sr-only">: {story.headline}</span>
     </a>

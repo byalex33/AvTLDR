@@ -1,7 +1,8 @@
 import assert from "node:assert/strict"
 import test from "node:test"
 
-const { extractStoryLinks } = await import("../src/lib/news.ts")
+const { extractStoryLinks, hasSourceDiversity, normalizeImageUrl, rankStories } = await import("../src/lib/news.ts")
+const { browseStories, stories } = await import("../src/lib/stories.ts")
 
 test("extractStoryLinks keeps publisher articles and rejects unrelated links", () => {
   const markdown = `
@@ -15,4 +16,52 @@ test("extractStoryLinks keeps publisher articles and rejects unrelated links", (
   assert.deepEqual(extractStoryLinks(markdown, "https://example.com/"), [
     "https://example.com/articles/new-aircraft-order-announced",
   ])
+})
+
+test("extractStoryLinks skips a source page that also links to itself", () => {
+  const homepage = "https://www.flightradar24.com/blog/press-and-media-center/"
+  const markdown = `[Press center](${homepage})\n[Release](/blog/inside-flightradar24/new-flight-data-partnership/)`
+
+  assert.deepEqual(extractStoryLinks(markdown, homepage), [
+    "https://www.flightradar24.com/blog/inside-flightradar24/new-flight-data-partnership/",
+  ])
+})
+
+test("rankStories puts the highest importance first without changing the input", () => {
+  const stories = [{ importance: 3 }, { importance: 10 }, { importance: 7 }]
+
+  assert.deepEqual(rankStories(stories).map(({ importance }) => importance), [10, 7, 3])
+  assert.deepEqual(stories.map(({ importance }) => importance), [3, 10, 7])
+})
+
+test("normalizeImageUrl accepts only web images", () => {
+  assert.equal(normalizeImageUrl("/hero.jpg", "https://example.com/story"), "https://example.com/hero.jpg")
+  assert.equal(normalizeImageUrl("javascript:alert(1)"), undefined)
+})
+
+test("the fallback is a full edition", () => {
+  assert.ok(stories.length >= 8)
+  assert.ok(hasSourceDiversity(stories))
+})
+
+test("source diversity rejects cosmetically different names from one dominant publisher", () => {
+  const edition = [
+    ...Array.from({ length: 3 }, () => ({ source: "AeroTime" })),
+    ...Array.from({ length: 3 }, () => ({ source: "Aero Time " })),
+    ...Array.from({ length: 2 }, () => ({ source: "AVweb" })),
+    ...Array.from({ length: 2 }, () => ({ source: "AirlineGeeks" })),
+  ]
+
+  assert.equal(hasSourceDiversity(edition), false)
+})
+
+test("story browser filters publisher and search before sorting", () => {
+  const result = browseStories(stories, {
+    publisher: "AVweb",
+    category: "All",
+    query: "Gulfstream",
+    sort: "importance",
+  })
+
+  assert.deepEqual(result.map((story) => story.id), ["gulfstream-saf"])
 })
