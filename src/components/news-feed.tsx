@@ -55,7 +55,7 @@ export function NewsFeed({ stories, editionDate }: { stories: Story[]; editionDa
     if (!checked && category === "Military") setCategory("All")
   }
 
-  const [lead, ...rest] = visibleStories
+  const [lead, ...rest] = visibleStories.slice(0, 7)
 
   return (
     <>

@@ -180,6 +180,59 @@
   }
 }
 
+@property --thanks-angle {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+
+@keyframes thanks-glow-spin {
+  to {
+    --thanks-angle: 360deg;
+  }
+}
+
+.say-thanks-glow {
+  position: relative;
+  isolation: isolate;
+  color: white;
+}
+
+.say-thanks-glow::before,
+.say-thanks-glow::after {
+  position: absolute;
+  content: "";
+  pointer-events: none;
+}
+
+.say-thanks-glow::before {
+  inset: -2px;
+  z-index: -2;
+  background: conic-gradient(
+    from var(--thanks-angle),
+    transparent 8%,
+    var(--primary) 28%,
+    oklch(0.84 0.16 80) 42%,
+    white 50%,
+    oklch(0.84 0.16 80) 58%,
+    var(--primary) 72%,
+    transparent 92%
+  );
+  box-shadow: 0 0 1.25rem color-mix(in oklch, var(--primary) 55%, transparent);
+  animation: thanks-glow-spin 4s linear infinite;
+}
+
+.say-thanks-glow::after {
+  inset: 0;
+  z-index: -1;
+  background: oklch(0.129 0.042 264);
+  transition: background-color 200ms ease;
+}
+
+.say-thanks-glow:hover::after {
+  background: color-mix(in oklch, oklch(0.129 0.042 264) 78%, var(--primary));
+}
+
 .celebration-card {
   animation: celebration-pop 480ms cubic-bezier(0.22, 1, 0.36, 1) both,
     celebration-out 350ms ease 4.75s forwards;

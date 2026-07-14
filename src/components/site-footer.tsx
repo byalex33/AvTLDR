@@ -16,7 +16,7 @@ export function SiteFooter() {
               href="https://ko-fi.com/alexb3"
               target="_blank"
               rel="noreferrer"
-              className="mt-5 inline-flex min-h-11 items-center border border-white/20 px-3 py-2 text-xs font-bold uppercase tracking-[0.12em] text-white/70 transition-colors hover:border-primary hover:bg-primary hover:text-primary-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+              className="say-thanks-glow mt-5 inline-flex min-h-11 items-center px-4 py-2 text-xs font-bold uppercase tracking-[0.12em] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
             >
               Say thanks ☕
             </a>
