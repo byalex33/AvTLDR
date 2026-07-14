@@ -14,6 +14,9 @@ export async function GET(request: Request) {
   try {
     const edition = await refreshNews()
     revalidatePath("/")
+    revalidatePath("/stories")
+    revalidatePath("/archive")
+    revalidatePath("/sitemap.xml")
     return Response.json({ ok: true, generatedAt: edition.generatedAt, stories: edition.stories.length })
   } catch (error) {
     console.error(error)

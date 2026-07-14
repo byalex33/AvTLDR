@@ -2,7 +2,15 @@ import assert from "node:assert/strict"
 import test from "node:test"
 
 const { extractStoryLinks, hasSourceDiversity, normalizeImageUrl, rankStories } = await import("../src/lib/news.ts")
-const { browseStories, stories } = await import("../src/lib/stories.ts")
+const { browseStories, stories, storyPath } = await import("../src/lib/stories.ts")
+const { formatUpdateCountdown } = await import("../src/lib/update-countdown.ts")
+
+test("countdown targets the next 06:00 UTC refresh", () => {
+  assert.equal(formatUpdateCountdown(Date.parse("2026-07-14T05:00:00Z")), "01H 00M")
+  assert.equal(formatUpdateCountdown(Date.parse("2026-07-14T06:00:00Z")), "24H 00M")
+  assert.equal(formatUpdateCountdown(Date.parse("2026-07-14T07:30:00Z")), "22H 30M")
+  assert.equal(formatUpdateCountdown(Date.parse("2026-07-14T05:59:30Z")), "00H 01M")
+})
 
 test("extractStoryLinks keeps publisher articles and rejects unrelated links", () => {
   const markdown = `
@@ -64,4 +72,8 @@ test("story browser filters publisher and search before sorting", () => {
   })
 
   assert.deepEqual(result.map((story) => story.id), ["gulfstream-saf"])
+})
+
+test("story permalinks include the edition and encode the story id", () => {
+  assert.equal(storyPath("2026-07-14", "airline/order"), "/stories/2026-07-14/airline%2Forder")
 })

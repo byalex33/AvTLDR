@@ -19,6 +19,7 @@ Copy `.env.example` to `.env.local` and provide:
 - `GEMINI_API_KEY`
 - `CRON_SECRET`
 - `BLOB_READ_WRITE_TOKEN` from a Vercel Blob store
+- `RESEND_API_KEY` with full access for contact-form delivery and newsletter signups
 
 Vercel calls `/api/cron` daily at 06:00 UTC. The endpoint scrapes a capped set of publisher pages, sends one batch to Gemini, validates the result, stores `avtldr/stories.json`, and revalidates the homepage.
 

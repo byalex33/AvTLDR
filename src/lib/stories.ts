@@ -19,6 +19,12 @@ export type Story = {
   imageUrl?: string
 }
 
+export const previewGeneratedAt = "2026-07-14T06:00:00.000Z"
+
+export function storyPath(date: string, id: string) {
+  return `/stories/${date}/${encodeURIComponent(id)}`
+}
+
 export function browseStories(
   stories: Story[],
   filters: { publisher: string; category: string; query: string; sort: string }

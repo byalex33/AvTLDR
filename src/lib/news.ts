@@ -1,8 +1,9 @@
-import { get, put } from "@vercel/blob"
+import { get, list, put } from "@vercel/blob"
 
-import type { Story, StoryCategory } from "./stories"
+import { previewGeneratedAt, type Story, type StoryCategory } from "./stories.ts"
 
 const BLOB_PATH = "avtldr/stories.json"
+const ARCHIVE_PREFIX = "avtldr/archive/"
 const categories = new Set<StoryCategory>([
   "Airlines",
   "Aircraft",
@@ -29,25 +30,65 @@ type ScrapedPage = {
   imageUrl?: string
 }
 
-type StoredEdition = {
+export type Edition = {
   generatedAt: string
   stories: Story[]
 }
 
-export async function loadStories(fallback: Story[]) {
-  const rankedFallback = rankStories(fallback)
-  if (!process.env.BLOB_READ_WRITE_TOKEN && !process.env.BLOB_STORE_ID) return rankedFallback
+export async function loadEdition(fallback: Story[]): Promise<Edition> {
+  const fallbackEdition = { generatedAt: previewGeneratedAt, stories: rankStories(fallback) }
+  if (!hasBlobStore()) return fallbackEdition
 
   try {
-    const result = await get(BLOB_PATH, { access: "public" })
-    if (!result || result.statusCode !== 200) return rankedFallback
-    const edition = JSON.parse(await new Response(result.stream).text()) as unknown
-    return isStoredEdition(edition) && hasSourceDiversity(edition.stories)
-      ? rankStories(edition.stories)
-      : rankedFallback
+    return (await readEdition(BLOB_PATH)) ?? fallbackEdition
   } catch {
-    return rankedFallback
+    return fallbackEdition
   }
+}
+
+export async function loadEditionByDate(date: string, fallback: Story[]) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return undefined
+  const current = await loadEdition(fallback)
+  return current.generatedAt.startsWith(date) ? current : loadArchiveEdition(date)
+}
+
+export async function listArchiveDates() {
+  if (!hasBlobStore()) return []
+  try {
+    // ponytail: one list covers ~2.7 years of daily editions; paginate after 1,000.
+    const { blobs } = await list({ prefix: ARCHIVE_PREFIX, limit: 1000 })
+    return [...new Set(blobs.flatMap(({ pathname }) => {
+      const date = pathname.match(/^avtldr\/archive\/(\d{4}-\d{2}-\d{2})\.json$/)?.[1]
+      return date ? [date] : []
+    }))].toSorted().reverse()
+  } catch {
+    return []
+  }
+}
+
+export function editionDay(generatedAt: string) {
+  return generatedAt.slice(0, 10)
+}
+
+export function formatEditionDate(generatedAt: string) {
+  return new Intl.DateTimeFormat("en-GB", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    timeZone: "Europe/London",
+  }).format(new Date(generatedAt))
+}
+
+export function formatEditionTimestamp(generatedAt: string) {
+  return new Intl.DateTimeFormat("en-GB", {
+    day: "numeric",
+    month: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+    timeZone: "Europe/London",
+    timeZoneName: "short",
+  }).format(new Date(generatedAt))
 }
 
 export function rankStories(stories: Story[]) {
@@ -90,18 +131,22 @@ export async function refreshNews() {
   if (stories.length < 8) throw new Error("Gemini returned fewer than 8 valid stories")
   if (!hasSourceDiversity(stories)) throw new Error("Gemini returned fewer than 3 publishers")
 
-  const edition: StoredEdition = {
+  const edition: Edition = {
     generatedAt: new Date().toISOString(),
     stories,
   }
 
-  await put(BLOB_PATH, JSON.stringify(edition), {
+  const body = JSON.stringify(edition)
+  const options = {
     access: "public",
     allowOverwrite: true,
     addRandomSuffix: false,
     cacheControlMaxAge: 60,
     contentType: "application/json",
-  })
+  } as const
+
+  await put(`${ARCHIVE_PREFIX}${editionDay(edition.generatedAt)}.json`, body, options)
+  await put(BLOB_PATH, body, options)
 
   return edition
 }
@@ -264,11 +309,34 @@ async function fetchWithTimeout(url: string, init: RequestInit, timeout = 25_000
   }
 }
 
-function isStoredEdition(value: unknown): value is StoredEdition {
+async function loadArchiveEdition(date: string) {
+  if (!hasBlobStore()) return undefined
+  try {
+    return await readEdition(`${ARCHIVE_PREFIX}${date}.json`)
+  } catch {
+    return undefined
+  }
+}
+
+async function readEdition(path: string) {
+  const result = await get(path, { access: "public" })
+  if (!result || result.statusCode !== 200) return undefined
+  const edition = JSON.parse(await new Response(result.stream).text()) as unknown
+  return isStoredEdition(edition) && hasSourceDiversity(edition.stories)
+    ? { ...edition, stories: rankStories(edition.stories) }
+    : undefined
+}
+
+function hasBlobStore() {
+  return Boolean(process.env.BLOB_READ_WRITE_TOKEN || process.env.BLOB_STORE_ID)
+}
+
+function isStoredEdition(value: unknown): value is Edition {
   if (!value || typeof value !== "object") return false
-  const edition = value as Partial<StoredEdition>
+  const edition = value as Partial<Edition>
   return (
     typeof edition.generatedAt === "string" &&
+    !Number.isNaN(Date.parse(edition.generatedAt)) &&
     Array.isArray(edition.stories) &&
     edition.stories.length > 0 &&
     edition.stories.every((story) => isStory(story))

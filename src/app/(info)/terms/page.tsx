@@ -1,15 +1,18 @@
 import type { Metadata } from "next"
 
-export const metadata: Metadata = {
-  title: "Terms — AvTLDR.news",
-  description: "Terms of use for AvTLDR.news.",
-}
+import { pageMetadata } from "@/lib/seo"
+
+export const metadata: Metadata = pageMetadata(
+  "Terms of use",
+  "Terms governing the use of AvTLDR aviation news summaries and links.",
+  "/terms",
+)
 
 export default function TermsPage() {
   return (
     <main className="mx-auto max-w-3xl px-4 py-16 sm:px-6 sm:py-24">
       <p className="text-xs font-bold uppercase tracking-[0.18em] text-primary">The small print</p>
-      <h1 className="mt-3 font-serif text-5xl font-bold tracking-[-0.04em] sm:text-6xl">Terms of use</h1>
+      <h1 className="mt-3 font-serif text-4xl font-bold tracking-[-0.04em] sm:text-6xl">Terms of use</h1>
       <p className="mt-4 text-sm text-muted-foreground">Last updated 14 July 2026</p>
 
       <div className="mt-12 space-y-9 text-base leading-8 text-foreground/80">

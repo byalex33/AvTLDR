@@ -5,8 +5,9 @@ import { useMemo, useState, useSyncExternalStore } from "react"
 import { ArrowRight, ArrowUpRight, CalendarDays, Moon, Newspaper, Plane, Shield, Sun } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
+import { ShareButton } from "@/components/share-button"
 import { Switch } from "@/components/ui/switch"
-import type { Story, StoryCategory } from "@/lib/stories"
+import { storyPath, type Story, type StoryCategory } from "@/lib/stories"
 
 const categories: Array<"All" | StoryCategory> = [
   "All",
@@ -30,7 +31,7 @@ function getMilitaryPreference() {
   return localStorage.getItem("avtldr:military") !== "false"
 }
 
-export function NewsFeed({ stories }: { stories: Story[] }) {
+export function NewsFeed({ stories, editionDate }: { stories: Story[]; editionDate: string }) {
   const [category, setCategory] = useState<(typeof categories)[number]>("All")
   const showMilitary = useSyncExternalStore(
     subscribeToMilitaryPreference,
@@ -58,13 +59,13 @@ export function NewsFeed({ stories }: { stories: Story[] }) {
 
   return (
     <>
-      <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-5 px-4 py-5 sm:px-6 lg:px-8">
-        <label className="flex items-center gap-3">
+      <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-x-5 gap-y-2 px-4 py-4 sm:px-6 sm:py-5 lg:px-8">
+        <label className="flex min-h-11 items-center gap-3">
           <span className="text-xs font-bold uppercase tracking-[0.12em] text-muted-foreground">Topic</span>
           <select
             value={category}
             onChange={(event) => setCategory(event.target.value as (typeof categories)[number])}
-            className="cursor-pointer border-0 border-b border-foreground/25 bg-transparent py-1 pr-8 font-serif text-lg font-bold outline-none focus:border-foreground"
+            className="min-h-11 cursor-pointer border-0 border-b border-foreground/25 bg-transparent py-1 pr-8 font-serif text-lg font-bold outline-none focus:border-foreground"
           >
             {categories.map((item) => (
               <option key={item}>{item}</option>
@@ -72,8 +73,8 @@ export function NewsFeed({ stories }: { stories: Story[] }) {
           </select>
         </label>
 
-        <div className="flex items-center gap-3">
-          <label htmlFor="military-news" className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.1em] text-muted-foreground">
+        <div className="flex min-h-11 items-center gap-3">
+          <label htmlFor="military-news" className="flex min-h-11 items-center gap-2 text-xs font-bold uppercase tracking-[0.1em] text-muted-foreground">
             <Shield className="size-4" aria-hidden="true" />
             Military news
           </label>
@@ -91,31 +92,31 @@ export function NewsFeed({ stories }: { stories: Story[] }) {
         {!lead ? (
           <div className="border border-dashed border-foreground/30 px-6 py-20 text-center">
             <p className="font-serif text-2xl font-bold">No stories in this category today.</p>
-            <Button className="mt-5" variant="outline" onClick={() => setCategory("All")}>
+            <Button className="mt-5 min-h-11" variant="outline" onClick={() => setCategory("All")}>
               View the full briefing
             </Button>
           </div>
         ) : (
           <>
             <section aria-labelledby="lead-story" className="grid border-y-2 border-foreground lg:grid-cols-[minmax(0,1.3fr)_minmax(20rem,0.7fr)]">
-              <article className="relative flex min-h-[32rem] flex-col justify-between overflow-hidden bg-foreground p-6 text-background sm:p-10 lg:p-12">
+              <article className="relative flex min-h-[28rem] flex-col justify-between overflow-hidden bg-slate-950 p-6 text-white sm:min-h-[32rem] sm:p-10 lg:p-12">
                 {lead.imageUrl ? (
                   <>
                     <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url("${lead.imageUrl}")` }} />
                     <div className="absolute inset-0 bg-black/65" />
                   </>
                 ) : (
-                  <Plane className="absolute -right-10 top-4 size-64 -rotate-12 text-background/[0.035]" strokeWidth={1} aria-hidden="true" />
+                  <Plane className="absolute -right-10 top-4 size-64 -rotate-12 text-white/[0.035]" strokeWidth={1} aria-hidden="true" />
                 )}
                 <div className="relative">
                   <p className="text-xs font-bold uppercase tracking-[0.2em] text-primary">Lead story</p>
                 </div>
                 <div className="relative max-w-3xl">
-                  <p className="mb-4 text-xs font-bold uppercase tracking-[0.18em] text-background/55">{lead.category}</p>
+                  <p className="mb-4 text-xs font-bold uppercase tracking-[0.18em] text-white/55">{lead.category}</p>
                   <h2 id="lead-story" className="font-serif text-4xl leading-[1.02] font-bold tracking-[-0.035em] text-balance sm:text-6xl">
-                    {lead.headline}
+                    <Link href={storyPath(editionDate, lead.id)} className="hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">{lead.headline}</Link>
                   </h2>
-                  <p className="mt-6 max-w-2xl text-lg leading-8 text-background/70">{lead.summary}</p>
+                  <p className="mt-6 max-w-2xl text-lg leading-8 text-white/70">{lead.summary}</p>
                 </div>
               </article>
 
@@ -130,7 +131,10 @@ export function NewsFeed({ stories }: { stories: Story[] }) {
                 </div>
                 <div className="flex flex-wrap items-center justify-between gap-3 border-t border-foreground/15 pt-5">
                   <StoryMeta story={lead} />
-                  <SourceLink story={lead} />
+                  <div className="flex items-center gap-4">
+                    <ShareButton story={lead} editionDate={editionDate} />
+                    <SourceLink story={lead} />
+                  </div>
                 </div>
               </aside>
             </section>
@@ -150,7 +154,7 @@ export function NewsFeed({ stories }: { stories: Story[] }) {
                     </p>
                     <Link
                       href="/stories"
-                      className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-[0.1em] text-primary hover:underline"
+                      className="inline-flex min-h-11 items-center gap-1.5 text-xs font-bold uppercase tracking-[0.1em] text-primary hover:underline"
                     >
                       See all stories
                       <ArrowRight className="size-3.5" aria-hidden="true" />
@@ -165,7 +169,7 @@ export function NewsFeed({ stories }: { stories: Story[] }) {
                         <span className="text-[0.68rem] font-bold uppercase tracking-[0.18em] text-primary">{story.category}</span>
                       </div>
                       <h3 className="mt-8 font-serif text-2xl leading-tight font-bold tracking-[-0.025em] group-hover:text-primary sm:text-3xl">
-                        {story.headline}
+                        <Link href={storyPath(editionDate, story.id)} className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">{story.headline}</Link>
                       </h3>
                       <p className="mt-4 leading-7 text-muted-foreground">{story.summary}</p>
                       <div className="mt-8 space-y-6 border-t border-foreground/15 pt-6">
@@ -174,7 +178,10 @@ export function NewsFeed({ stories }: { stories: Story[] }) {
                       </div>
                       <div className="mt-auto flex flex-wrap items-center justify-between gap-3 pt-8">
                         <StoryMeta story={story} />
-                        <SourceLink story={story} compact />
+                        <div className="flex items-center gap-4">
+                          <ShareButton story={story} editionDate={editionDate} />
+                          <SourceLink story={story} compact />
+                        </div>
                       </div>
                     </article>
                   ))}
@@ -202,7 +209,7 @@ export function ThemeToggle() {
       type="button"
       aria-pressed={dark}
       onClick={toggleTheme}
-      className="inline-flex items-center gap-2 border border-background/25 px-3 py-2 font-bold uppercase tracking-[0.1em] text-background/70 transition-colors hover:bg-background hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-background"
+      className="inline-flex min-h-11 items-center gap-2 border border-white/25 px-3 py-2 font-bold uppercase tracking-[0.1em] text-white/70 transition-colors hover:bg-white hover:text-slate-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
     >
       {dark ? <Sun className="size-4" aria-hidden="true" /> : <Moon className="size-4" aria-hidden="true" />}
       {dark ? "Light theme" : "Dark theme"}
@@ -240,7 +247,7 @@ export function SourceLink({ story, compact = false }: { story: Story; compact?:
       href={story.url}
       target="_blank"
       rel="noreferrer"
-      className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-[0.1em] text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      className="inline-flex min-h-11 items-center gap-1.5 text-xs font-bold uppercase tracking-[0.1em] text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
     >
       {compact ? "Source" : "Read source"}
       <ArrowUpRight className="size-3.5" aria-hidden="true" />
