@@ -1,9 +1,8 @@
 import type { Metadata } from "next"
 import Link from "next/link"
 import { Check, Mail, Plane } from "lucide-react"
-import { redirect } from "next/navigation"
 
-import { validateEmail } from "@/lib/contact"
+import { NewsletterCelebration } from "@/components/newsletter-celebration"
 import { pageMetadata } from "@/lib/seo"
 
 export const metadata: Metadata = pageMetadata(
@@ -12,42 +11,12 @@ export const metadata: Metadata = pageMetadata(
   "/newsletter",
 )
 
-async function subscribe(formData: FormData) {
-  "use server"
-
-  if (formData.get("website")) redirect("/newsletter?subscribed=1")
-
-  const email = validateEmail(formData.get("email"))
-  if (!email) redirect("/newsletter?error=invalid")
-  if (!process.env.RESEND_API_KEY) redirect("/newsletter?error=config")
-
-  let subscribed = false
-
-  try {
-    const response = await fetch("https://api.resend.com/contacts", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
-        "Content-Type": "application/json",
-        "User-Agent": "AvTLDR.news/1.0",
-      },
-      body: JSON.stringify({ email }),
-    })
-
-    subscribed = response.ok
-    if (!subscribed) console.error("Resend rejected a newsletter signup:", response.status, await response.text())
-  } catch (error) {
-    console.error("Newsletter signup failed:", error)
-  }
-
-  redirect(subscribed ? "/newsletter?subscribed=1" : "/newsletter?error=send")
-}
-
 export default async function NewsletterPage({ searchParams }: PageProps<"/newsletter">) {
   const { subscribed, error } = await searchParams
 
   return (
     <main className="mx-auto max-w-4xl px-4 py-16 sm:px-6 sm:py-24">
+      {subscribed === "1" && <NewsletterCelebration />}
       <div className="relative overflow-hidden bg-slate-950 px-6 py-14 text-white sm:px-12 sm:py-20">
         <Plane className="absolute -right-16 -top-10 size-72 -rotate-12 text-white/[0.04]" strokeWidth={1} aria-hidden="true" />
         <div className="relative max-w-2xl">
@@ -73,7 +42,7 @@ export default async function NewsletterPage({ searchParams }: PageProps<"/newsl
                   {error === "invalid" ? "Enter a valid email address." : "We couldn't add you right now. Please try again."}
                 </p>
               )}
-              <form action={subscribe} className={`${error ? "mt-4" : "mt-10"} flex max-w-xl flex-col gap-3 sm:flex-row`}>
+              <form action="/api/newsletter" method="post" className={`${error ? "mt-4" : "mt-10"} flex max-w-xl flex-col gap-3 sm:flex-row`}>
                 <label className="sr-only" htmlFor="newsletter-email">Email address</label>
                 <input
                   id="newsletter-email"

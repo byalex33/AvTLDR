@@ -2,8 +2,6 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
-@custom-variant dark (&:is(.dark *));
-
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -129,62 +127,6 @@
   --tracking-normal: -0.01em;
 }
 
-.dark {
-  color-scheme: dark;
-  --background: oklch(0.1450 0.0028 247.4358);
-  --foreground: oklch(0.9848 0 0);
-  --card: oklch(0.1803 0.0047 248.0863);
-  --card-foreground: oklch(0.9848 0 0);
-  --popover: oklch(0.1803 0.0047 248.0863);
-  --popover-foreground: oklch(0.9848 0 0);
-  --primary: oklch(0.5778 0.2282 26.5713);
-  --primary-foreground: oklch(1.0000 0 0);
-  --secondary: oklch(0.2674 0.0090 248.1657);
-  --secondary-foreground: oklch(0.9848 0 0);
-  --muted: oklch(0.2357 0.0075 248.1444);
-  --muted-foreground: oklch(0.7200 0.0165 248.0568);
-  --accent: oklch(0.2566 0.0939 23.8695);
-  --accent-foreground: oklch(0.7958 0.1022 15.2778);
-  --destructive: oklch(0.3901 0.1297 25.5736);
-  --border: oklch(0.2777 0.0095 248.1714);
-  --input: oklch(0.2777 0.0095 248.1714);
-  --ring: oklch(0.5778 0.2282 26.5713);
-  --chart-1: oklch(0.5778 0.2282 26.5713);
-  --chart-2: oklch(0.8428 0.0090 247.9335);
-  --chart-3: oklch(0.7176 0.1902 149.6000);
-  --chart-4: oklch(0.8562 0.1696 90.9651);
-  --chart-5: oklch(0.7159 0.1804 49.4714);
-  --sidebar: oklch(0.1917 0.0052 248.1014);
-  --sidebar-foreground: oklch(0.9222 0.0044 247.8716);
-  --sidebar-primary: oklch(0.5778 0.2282 26.5713);
-  --sidebar-primary-foreground: oklch(1.0000 0 0);
-  --sidebar-accent: oklch(0.2566 0.0939 23.8695);
-  --sidebar-accent-foreground: oklch(0.8446 0.0747 14.3349);
-  --sidebar-border: oklch(0.2569 0.0085 248.1593);
-  --sidebar-ring: oklch(0.5778 0.2282 26.5713);
-  --destructive-foreground: oklch(0.9848 0 0);
-  --radius: 0.5rem;
-  --font-sans: Inter, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif;
-  --font-serif: Georgia, serif;
-  --font-mono: JetBrains Mono, Menlo, monospace;
-  --shadow-color: 0 0 0;
-  --shadow-opacity: 0.4;
-  --shadow-blur: 8px;
-  --shadow-spread: 0px;
-  --shadow-offset-x: 0px;
-  --shadow-offset-y: 2px;
-  --letter-spacing: -0.01em;
-  --spacing: 0.25rem;
-  --shadow-2xs: 0px 2px 8px 0px hsl(0 0 0 / 0.20);
-  --shadow-xs: 0px 2px 8px 0px hsl(0 0 0 / 0.20);
-  --shadow-sm: 0px 2px 8px 0px hsl(0 0 0 / 0.40), 0px 1px 2px -1px hsl(0 0 0 / 0.40);
-  --shadow: 0px 2px 8px 0px hsl(0 0 0 / 0.40), 0px 1px 2px -1px hsl(0 0 0 / 0.40);
-  --shadow-md: 0px 2px 8px 0px hsl(0 0 0 / 0.40), 0px 2px 4px -1px hsl(0 0 0 / 0.40);
-  --shadow-lg: 0px 2px 8px 0px hsl(0 0 0 / 0.40), 0px 4px 6px -1px hsl(0 0 0 / 0.40);
-  --shadow-xl: 0px 2px 8px 0px hsl(0 0 0 / 0.40), 0px 8px 10px -1px hsl(0 0 0 / 0.40);
-  --shadow-2xl: 0px 2px 8px 0px hsl(0 0 0 / 1.00);
-}
-
 @layer base {
   * {
     @apply border-border outline-ring/50;
@@ -200,5 +142,144 @@
   }
   ::selection {
     @apply bg-primary text-primary-foreground;
+  }
+}
+
+@keyframes page-enter {
+  from {
+    opacity: 0;
+    transform: translateY(0.75rem);
+  }
+}
+
+@keyframes celebration-pop {
+  from {
+    opacity: 0;
+    transform: translateY(-1rem) scale(0.92);
+  }
+}
+
+@keyframes celebration-out {
+  to {
+    opacity: 0;
+    transform: translateY(-0.75rem) scale(0.98);
+  }
+}
+
+@keyframes confetti-fall {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, -2rem, 0) rotate(0deg);
+  }
+  10% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(var(--confetti-drift), 105vh, 0) rotate(720deg);
+  }
+}
+
+.celebration-card {
+  animation: celebration-pop 480ms cubic-bezier(0.22, 1, 0.36, 1) both,
+    celebration-out 350ms ease 4.75s forwards;
+}
+
+.confetti-piece {
+  --confetti-drift: 4rem;
+  animation: confetti-fall 2.2s cubic-bezier(0.16, 0.84, 0.44, 1) both;
+  height: 0.8rem;
+  position: absolute;
+  top: -1rem;
+  width: 0.55rem;
+}
+
+.confetti-piece:nth-child(even) {
+  --confetti-drift: -4rem;
+}
+
+.confetti-piece:nth-child(3n) {
+  border-radius: 9999px;
+}
+
+.confetti-piece:nth-child(5n) {
+  height: 1rem;
+  width: 0.25rem;
+}
+
+@keyframes avtldr-loader-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes avtldr-loader-path {
+  0%,
+  100% {
+    stroke-dasharray: 0 580 0 0 0 0 0 0 0;
+  }
+  50% {
+    stroke-dasharray: 0 450 10 30 10 30 10 30 10;
+  }
+}
+
+.avtldr-loader {
+  position: relative;
+  aspect-ratio: 1;
+  width: 10rem;
+  animation: avtldr-loader-spin 1.4s linear infinite;
+}
+
+.avtldr-loader-path {
+  fill: none;
+  stroke: color-mix(in oklch, var(--foreground) 38%, transparent);
+  stroke-width: 4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  animation: avtldr-loader-path 1.4s ease-in-out infinite;
+}
+
+.avtldr-loader-plane {
+  position: absolute;
+  top: 0.25rem;
+  left: 50%;
+  width: 2.25rem;
+  height: 2.25rem;
+  color: var(--primary);
+  fill: var(--background);
+  transform: translateX(-50%) rotate(45deg);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  main {
+    animation: page-enter 500ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .celebration-card {
+    animation: none;
+  }
+
+  .confetti-piece {
+    display: none;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .avtldr-loader,
+  .avtldr-loader-path {
+    animation: none !important;
+  }
+
+  .avtldr-loader-path {
+    stroke-dasharray: 10 10;
   }
 }

@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { useMemo, useState, useSyncExternalStore } from "react"
-import { ArrowRight, ArrowUpRight, CalendarDays, Moon, Newspaper, Plane, Shield, Sun } from "lucide-react"
+import { ArrowRight, ArrowUpRight, CalendarDays, Newspaper, Plane, Shield } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { ShareButton } from "@/components/share-button"
@@ -99,10 +99,10 @@ export function NewsFeed({ stories, editionDate }: { stories: Story[]; editionDa
         ) : (
           <>
             <section aria-labelledby="lead-story" className="grid border-y-2 border-foreground lg:grid-cols-[minmax(0,1.3fr)_minmax(20rem,0.7fr)]">
-              <article className="relative flex min-h-[28rem] flex-col justify-between overflow-hidden bg-slate-950 p-6 text-white sm:min-h-[32rem] sm:p-10 lg:p-12">
+              <article className="group relative flex min-h-[28rem] flex-col justify-between overflow-hidden bg-slate-950 p-6 text-white sm:min-h-[32rem] sm:p-10 lg:p-12">
                 {lead.imageUrl ? (
                   <>
-                    <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url("${lead.imageUrl}")` }} />
+                    <div className="absolute inset-0 bg-cover bg-center transition-transform duration-1000 ease-out group-hover:scale-[1.025] motion-reduce:transform-none" style={{ backgroundImage: `url("${lead.imageUrl}")` }} />
                     <div className="absolute inset-0 bg-black/65" />
                   </>
                 ) : (
@@ -126,8 +126,7 @@ export function NewsFeed({ stories, editionDate }: { stories: Story[]; editionDa
                   <span className="font-mono text-xs text-muted-foreground">01</span>
                 </div>
                 <div className="flex flex-1 flex-col justify-center gap-8 py-10">
-                  <StoryPoint label="What happened" text={lead.whatHappened} />
-                  <StoryPoint label="Why it matters" text={lead.whyItMatters} />
+                  <StoryPoint label="TL;DR" text={`${lead.whatHappened} ${lead.whyItMatters}`} />
                 </div>
                 <div className="flex flex-wrap items-center justify-between gap-3 border-t border-foreground/15 pt-5">
                   <StoryMeta story={lead} />
@@ -164,7 +163,7 @@ export function NewsFeed({ stories, editionDate }: { stories: Story[]; editionDa
 
                 <div className="grid gap-px bg-foreground/15 border border-foreground/15 md:grid-cols-2 xl:grid-cols-3">
                   {rest.map((story) => (
-                    <article key={story.id} className="group flex min-h-[29rem] flex-col bg-card p-6 transition-colors hover:bg-secondary sm:p-7">
+                    <article key={story.id} className="group flex min-h-[29rem] flex-col bg-card p-6 transition-[transform,background-color,box-shadow] duration-200 hover:-translate-y-1 hover:bg-secondary hover:shadow-lg motion-reduce:transform-none sm:p-7">
                       <div>
                         <span className="text-[0.68rem] font-bold uppercase tracking-[0.18em] text-primary">{story.category}</span>
                       </div>
@@ -173,8 +172,7 @@ export function NewsFeed({ stories, editionDate }: { stories: Story[]; editionDa
                       </h3>
                       <p className="mt-4 leading-7 text-muted-foreground">{story.summary}</p>
                       <div className="mt-8 space-y-6 border-t border-foreground/15 pt-6">
-                        <StoryPoint label="What happened" text={story.whatHappened} compact />
-                        <StoryPoint label="Why it matters" text={story.whyItMatters} compact />
+                        <StoryPoint label="TL;DR" text={`${story.whatHappened} ${story.whyItMatters}`} compact />
                       </div>
                       <div className="mt-auto flex flex-wrap items-center justify-between gap-3 pt-8">
                         <StoryMeta story={story} />
@@ -192,28 +190,6 @@ export function NewsFeed({ stories, editionDate }: { stories: Story[]; editionDa
         )}
       </main>
     </>
-  )
-}
-
-export function ThemeToggle() {
-  const [dark, setDark] = useState(false)
-
-  function toggleTheme() {
-    const next = !document.documentElement.classList.contains("dark")
-    document.documentElement.classList.toggle("dark", next)
-    setDark(next)
-  }
-
-  return (
-    <button
-      type="button"
-      aria-pressed={dark}
-      onClick={toggleTheme}
-      className="inline-flex min-h-11 items-center gap-2 border border-white/25 px-3 py-2 font-bold uppercase tracking-[0.1em] text-white/70 transition-colors hover:bg-white hover:text-slate-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
-    >
-      {dark ? <Sun className="size-4" aria-hidden="true" /> : <Moon className="size-4" aria-hidden="true" />}
-      {dark ? "Light theme" : "Dark theme"}
-    </button>
   )
 }
 

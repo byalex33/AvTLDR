@@ -47,10 +47,6 @@ export default async function StoriesPage() {
       </section>
 
       <StoryBrowser stories={edition.stories} editionDate={editionDay(edition.generatedAt)} />
-
-      <footer className="border-t border-foreground/15 px-4 py-8 text-center text-xs text-muted-foreground">
-        Headlines summarised. Reporting belongs to the linked publishers.
-      </footer>
     </div>
   )
 }

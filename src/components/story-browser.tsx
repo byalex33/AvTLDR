@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { useMemo, useState } from "react"
-import { Plane, Search, X } from "lucide-react"
+import { LayoutGrid, List, Plane, Search, X } from "lucide-react"
 
 import { SourceLink, StoryMeta } from "@/components/news-feed"
 import { ShareButton } from "@/components/share-button"
@@ -22,6 +22,7 @@ export function StoryBrowser({ stories, editionDate }: { stories: Story[]; editi
   const [category, setCategory] = useState<(typeof categories)[number]>("All")
   const [sort, setSort] = useState("importance")
   const [query, setQuery] = useState("")
+  const [view, setView] = useState<"list" | "grid">("list")
 
   const publishers = useMemo(
     () => [...new Set(stories.map((story) => story.source))].toSorted(),
@@ -108,31 +109,53 @@ export function StoryBrowser({ stories, editionDate }: { stories: Story[]; editi
           <p className="text-sm text-muted-foreground">
             Showing <span className="font-bold text-foreground">{visibleStories.length}</span> {visibleStories.length === 1 ? "story" : "stories"}
           </p>
-          {(publisher !== "All" || category !== "All" || Boolean(query)) && (
-            <button type="button" onClick={clearFilters} className="inline-flex min-h-11 items-center gap-1.5 text-xs font-bold uppercase tracking-[0.1em] text-primary hover:underline">
-              <X className="size-3.5" aria-hidden="true" />
-              Clear filters
-            </button>
-          )}
+          <div className="ml-auto flex items-center gap-3">
+            {(publisher !== "All" || category !== "All" || Boolean(query)) && (
+              <button type="button" onClick={clearFilters} className="inline-flex min-h-11 items-center gap-1.5 text-xs font-bold uppercase tracking-[0.1em] text-primary hover:underline">
+                <X className="size-3.5" aria-hidden="true" />
+                Clear filters
+              </button>
+            )}
+            <div className="flex border border-foreground/20 bg-card" role="group" aria-label="Story view">
+              <button
+                type="button"
+                aria-label="List view"
+                aria-pressed={view === "list"}
+                onClick={() => setView("list")}
+                className={`grid size-11 place-items-center transition-colors ${view === "list" ? "bg-foreground text-background" : "text-muted-foreground hover:bg-secondary hover:text-foreground"}`}
+              >
+                <List className="size-4" aria-hidden="true" />
+              </button>
+              <button
+                type="button"
+                aria-label="Grid view"
+                aria-pressed={view === "grid"}
+                onClick={() => setView("grid")}
+                className={`grid size-11 place-items-center border-l border-foreground/20 transition-colors ${view === "grid" ? "bg-foreground text-background" : "text-muted-foreground hover:bg-secondary hover:text-foreground"}`}
+              >
+                <LayoutGrid className="size-4" aria-hidden="true" />
+              </button>
+            </div>
+          </div>
         </div>
 
         {visibleStories.length ? (
-          <div className="divide-y divide-foreground/15 border-y border-foreground/15">
+          <div className={view === "grid" ? "grid gap-px border border-foreground/15 bg-foreground/15 md:grid-cols-2" : "divide-y divide-foreground/15 border-y border-foreground/15"}>
             {visibleStories.map((story) => (
-              <article key={story.id} className="group grid gap-6 bg-card py-7 sm:grid-cols-[12rem_minmax(0,1fr)] sm:px-5">
+              <article key={story.id} className={view === "grid" ? "group flex min-w-0 flex-col bg-card p-6 transition-[transform,background-color] duration-200 hover:-translate-y-0.5 hover:bg-secondary/50 motion-reduce:transform-none" : "group grid gap-6 bg-card py-7 transition-[transform,background-color] duration-200 hover:-translate-y-0.5 hover:bg-secondary/50 motion-reduce:transform-none sm:grid-cols-[12rem_minmax(0,1fr)] sm:px-5"}>
                 <div
-                  className="flex min-h-40 items-center justify-center overflow-hidden bg-slate-950 bg-cover bg-center text-white"
+                  className={`flex min-h-40 items-center justify-center overflow-hidden bg-slate-950 bg-cover bg-center text-white ${view === "grid" ? "aspect-video" : ""}`}
                   style={story.imageUrl ? { backgroundImage: `linear-gradient(rgb(0 0 0 / 0.18), rgb(0 0 0 / 0.18)), url("${story.imageUrl}")` } : undefined}
                 >
                   {!story.imageUrl && <Plane className="size-10 -rotate-12 opacity-25" aria-hidden="true" />}
                 </div>
-                <div className="flex min-w-0 flex-col">
+                <div className={`flex min-w-0 flex-col ${view === "grid" ? "flex-1 pt-6" : ""}`}>
                   <p className="text-[0.68rem] font-bold uppercase tracking-[0.18em] text-primary">{story.category}</p>
                   <h2 className="mt-3 max-w-3xl font-serif text-2xl leading-tight font-bold tracking-[-0.025em] group-hover:text-primary sm:text-3xl">
                     <Link href={storyPath(editionDate, story.id)} className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">{story.headline}</Link>
                   </h2>
                   <p className="mt-3 max-w-3xl leading-7 text-muted-foreground">{story.summary}</p>
-                  <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
+                  <div className={`${view === "grid" ? "mt-auto pt-6" : "mt-6"} flex flex-wrap items-center justify-between gap-3`}>
                     <StoryMeta story={story} />
                     <div className="flex items-center gap-4">
                       <ShareButton story={story} editionDate={editionDate} />

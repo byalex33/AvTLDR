@@ -96,16 +96,10 @@ export default async function StoryPage({ params }: PageProps<"/stories/[date]/[
 
           {story.imageUrl && <div className="mt-10 aspect-[16/9] bg-slate-950 bg-cover bg-center" aria-hidden="true" style={{ backgroundImage: `url("${story.imageUrl}")` }} />}
 
-          <div className="mt-10 grid gap-px bg-foreground/15 border border-foreground/15 md:grid-cols-2">
-            <section className="bg-card p-7 sm:p-9">
-              <h2 className="text-xs font-bold uppercase tracking-[0.18em] text-primary">What happened</h2>
-              <p className="mt-4 text-lg leading-8">{story.whatHappened}</p>
-            </section>
-            <section className="bg-card p-7 sm:p-9">
-              <h2 className="text-xs font-bold uppercase tracking-[0.18em] text-primary">Why it matters</h2>
-              <p className="mt-4 text-lg leading-8">{story.whyItMatters}</p>
-            </section>
-          </div>
+          <section className="mt-10 border border-foreground/15 bg-card p-7 sm:p-9">
+            <h2 className="text-xs font-bold uppercase tracking-[0.18em] text-primary">TL;DR</h2>
+            <p className="mt-4 max-w-4xl text-lg leading-8">{story.whatHappened} {story.whyItMatters}</p>
+          </section>
 
           <div className="mt-8 flex flex-wrap items-center justify-between gap-4 border-y border-foreground/15 py-5">
             <StoryMeta story={story} />

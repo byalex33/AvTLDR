@@ -33,7 +33,7 @@ export function ShareButton({ story, editionDate }: { story: Story; editionDate:
       onClick={share}
       className="inline-flex min-h-11 items-center gap-1.5 text-xs font-bold uppercase tracking-[0.1em] text-muted-foreground underline-offset-4 hover:text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
     >
-      {status === "copied" ? <Check className="size-3.5" aria-hidden="true" /> : status === "failed" ? <X className="size-3.5" aria-hidden="true" /> : <Share2 className="size-3.5" aria-hidden="true" />}
+      {status === "copied" ? <Check className="size-3.5 animate-in zoom-in-75 motion-reduce:animate-none" aria-hidden="true" /> : status === "failed" ? <X className="size-3.5 animate-in zoom-in-75 motion-reduce:animate-none" aria-hidden="true" /> : <Share2 className="size-3.5" aria-hidden="true" />}
       {status === "copied" ? "Link copied" : status === "failed" ? "Copy failed" : "Share"}
     </button>
   )

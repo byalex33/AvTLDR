@@ -14,9 +14,12 @@ export function UpdateCountdown() {
     return () => clearInterval(timer)
   }, [])
 
+  const countdown = now ? formatUpdateCountdown(now) : "--H --M"
+
   return (
-    <p className="hidden text-white/60 sm:block">
-      Next update in <span className="tabular-nums text-white">{now ? formatUpdateCountdown(now) : "--H --M"}</span>
+    <p className="shrink-0 whitespace-nowrap text-white/60" aria-label={`Next update in ${countdown}`}>
+      <span aria-hidden="true" className="hidden sm:inline">Next update in </span>
+      <span className="tabular-nums text-white" aria-hidden="true">{countdown}</span>
     </p>
   )
 }

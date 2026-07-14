@@ -1,5 +1,5 @@
 import type { Metadata } from "next"
-import { Mail, Send } from "lucide-react"
+import { Check, Mail, Plane, Send } from "lucide-react"
 import { redirect } from "next/navigation"
 
 import { validateContactMessage } from "@/lib/contact"
@@ -7,7 +7,7 @@ import { pageMetadata } from "@/lib/seo"
 
 export const metadata: Metadata = pageMetadata(
   "Contact",
-  "Contact AvTLDR with aviation news tips, corrections, questions, or feedback.",
+  "Contact AvTLDR with corrections, website feedback, questions, or general enquiries.",
   "/contact",
 )
 
@@ -57,64 +57,91 @@ export default async function ContactPage({ searchParams }: PageProps<"/contact"
   const { sent, error } = await searchParams
 
   return (
-    <main className="mx-auto max-w-4xl px-4 py-16 sm:px-6 sm:py-24">
-      <p className="text-xs font-bold uppercase tracking-[0.18em] text-primary">Open channel</p>
-      <h1 className="mt-3 font-serif text-4xl font-bold tracking-[-0.04em] sm:text-6xl">Contact us</h1>
-      <p className="mt-5 max-w-2xl text-lg leading-8 text-muted-foreground">
-        Spotted something we missed, have a tip, or just want to say hello? Send it over.
-      </p>
+    <main className="mx-auto max-w-5xl px-4 py-12 sm:px-6 sm:py-20">
+      <div className="grid overflow-hidden border border-foreground/15 lg:grid-cols-[0.85fr_1.15fr]">
+        <aside className="relative flex flex-col justify-between overflow-hidden bg-slate-950 p-7 text-white sm:p-10 lg:min-h-[44rem]">
+          <Plane className="absolute -right-20 -top-12 size-72 -rotate-12 text-white/[0.04]" strokeWidth={1} aria-hidden="true" />
+          <div className="relative">
+            <p className="text-xs font-bold uppercase tracking-[0.2em] text-primary">Open channel</p>
+            <h1 className="mt-4 font-serif text-5xl font-bold leading-[0.95] tracking-[-0.045em] sm:text-6xl">Let&apos;s talk aviation.</h1>
+            <p className="mt-6 max-w-md text-lg leading-8 text-white/65">
+              Spotted something we missed, found a site issue, or want to make the briefing better? We&apos;re listening.
+            </p>
 
-      <div className="mt-12 grid gap-10 md:grid-cols-[1fr_2fr]">
-        <aside className="border-l-2 border-primary pl-5">
-          <Mail className="size-5 text-primary" aria-hidden="true" />
-          <h2 className="mt-4 font-serif text-2xl font-bold">Prefer email?</h2>
-          <a className="mt-2 inline-block text-sm font-semibold text-primary underline underline-offset-4" href="mailto:contact@avtldr.news">
-            contact@avtldr.news
-          </a>
-          <p className="mt-4 text-sm leading-6 text-muted-foreground">We&apos;ll get back to you as soon as we can.</p>
+            <ul className="mt-10 space-y-5 text-sm font-semibold text-white/80" aria-label="Reasons to contact us">
+              {[
+                ["01", "Corrections and clarifications"],
+                ["02", "Website feedback and technical issues"],
+                ["03", "Questions and general enquiries"],
+              ].map(([number, label]) => (
+                <li key={number} className="flex items-center gap-3 border-t border-white/15 pt-5">
+                  <span className="font-mono text-xs text-primary">{number}</span>
+                  {label}
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="relative mt-12 border-t border-white/15 pt-6">
+            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.16em] text-primary">
+              <Mail className="size-4" aria-hidden="true" /> Prefer email?
+            </div>
+            <a className="mt-3 inline-block font-semibold text-white underline decoration-white/35 underline-offset-4 hover:decoration-primary" href="mailto:contact@avtldr.news">
+              contact@avtldr.news
+            </a>
+          </div>
         </aside>
 
-        <div>
-          {sent === "1" && (
-            <p role="status" className="mb-6 border-l-2 border-primary bg-accent px-4 py-3 text-sm font-semibold">
-              Message sent. Thanks for getting in touch.
-            </p>
-          )}
-          {error && (
-            <p role="alert" className="mb-6 border-l-2 border-destructive bg-destructive/10 px-4 py-3 text-sm">
-              {error === "invalid" ? "Check each field and try again." : "We couldn't send that right now. Please email us instead."}
-            </p>
-          )}
+        <section className="bg-card p-7 sm:p-10" aria-labelledby="contact-form-title">
+          <p className="text-xs font-bold uppercase tracking-[0.18em] text-primary">Send a transmission</p>
+          <h2 id="contact-form-title" className="mt-3 font-serif text-3xl font-bold tracking-[-0.03em] sm:text-4xl">What&apos;s on your radar?</h2>
+          <p className="mt-3 text-sm leading-6 text-muted-foreground">All fields are required. We read every message.</p>
 
-          <form action={sendMessage} className="space-y-6">
-            <div className="grid gap-6 sm:grid-cols-2">
-              <label className="grid gap-2 text-sm font-semibold" htmlFor="name">
-                Name
-                <input id="name" name="name" required maxLength={100} autoComplete="name" className="h-11 border bg-card px-3 text-base font-normal outline-none focus:border-ring focus:ring-2 focus:ring-ring/20" />
-              </label>
-              <label className="grid gap-2 text-sm font-semibold" htmlFor="email">
-                Email
-                <input id="email" name="email" type="email" required maxLength={254} autoComplete="email" className="h-11 border bg-card px-3 text-base font-normal outline-none focus:border-ring focus:ring-2 focus:ring-ring/20" />
-              </label>
+          {sent === "1" ? (
+            <div role="status" className="mt-10 border-l-2 border-primary bg-accent p-6">
+              <Check className="size-7 text-primary" aria-hidden="true" />
+              <p className="mt-4 font-serif text-2xl font-bold">Message received.</p>
+              <p className="mt-2 text-sm leading-6 text-muted-foreground">Thanks for getting in touch. We&apos;ll take a look and reply if needed.</p>
             </div>
-            <label className="grid gap-2 text-sm font-semibold" htmlFor="subject">
-              Subject
-              <input id="subject" name="subject" required maxLength={150} className="h-11 border bg-card px-3 text-base font-normal outline-none focus:border-ring focus:ring-2 focus:ring-ring/20" />
-            </label>
-            <label className="grid gap-2 text-sm font-semibold" htmlFor="message">
-              Message
-              <textarea id="message" name="message" required maxLength={5000} rows={7} className="resize-y border bg-card px-3 py-3 text-base font-normal outline-none focus:border-ring focus:ring-2 focus:ring-ring/20" />
-            </label>
-            <label className="absolute -left-[9999px]" htmlFor="website" aria-hidden="true">
-              Website
-              <input id="website" name="website" tabIndex={-1} autoComplete="off" />
-            </label>
-            <button type="submit" className="inline-flex items-center gap-2 bg-primary px-5 py-3 text-sm font-bold uppercase tracking-[0.1em] text-primary-foreground transition-colors hover:bg-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
-              <Send className="size-4" aria-hidden="true" />
-              Send message
-            </button>
-          </form>
-        </div>
+          ) : (
+            <>
+              {error && (
+                <p role="alert" className="mt-8 border-l-2 border-destructive bg-destructive/10 px-4 py-3 text-sm">
+                  {error === "invalid" ? "Check each field and try again." : "We couldn't send that right now. Please email us instead."}
+                </p>
+              )}
+
+              <form action={sendMessage} className="mt-8 space-y-6">
+                <div className="grid gap-6 sm:grid-cols-2">
+                  <label className="grid gap-2 text-xs font-bold uppercase tracking-[0.12em]" htmlFor="name">
+                    Name
+                    <input id="name" name="name" required maxLength={100} autoComplete="name" placeholder="Your name" className="h-12 border bg-background px-4 text-base font-normal normal-case tracking-normal outline-none placeholder:text-muted-foreground/55 focus:border-ring focus:ring-2 focus:ring-ring/20" />
+                  </label>
+                  <label className="grid gap-2 text-xs font-bold uppercase tracking-[0.12em]" htmlFor="email">
+                    Email
+                    <input id="email" name="email" type="email" required maxLength={254} autoComplete="email" inputMode="email" placeholder="you@example.com" className="h-12 border bg-background px-4 text-base font-normal normal-case tracking-normal outline-none placeholder:text-muted-foreground/55 focus:border-ring focus:ring-2 focus:ring-ring/20" />
+                  </label>
+                </div>
+                <label className="grid gap-2 text-xs font-bold uppercase tracking-[0.12em]" htmlFor="subject">
+                  Subject
+                  <input id="subject" name="subject" required maxLength={150} placeholder="What is this about?" className="h-12 border bg-background px-4 text-base font-normal normal-case tracking-normal outline-none placeholder:text-muted-foreground/55 focus:border-ring focus:ring-2 focus:ring-ring/20" />
+                </label>
+                <label className="grid gap-2 text-xs font-bold uppercase tracking-[0.12em]" htmlFor="message">
+                  Message
+                  <textarea id="message" name="message" required maxLength={5000} rows={8} placeholder="Tell us what happened…" className="resize-y border bg-background px-4 py-3 text-base font-normal normal-case tracking-normal outline-none placeholder:text-muted-foreground/55 focus:border-ring focus:ring-2 focus:ring-ring/20" />
+                </label>
+                <label className="absolute -left-[9999px]" htmlFor="website" aria-hidden="true">
+                  Website
+                  <input id="website" name="website" tabIndex={-1} autoComplete="off" />
+                </label>
+                <button type="submit" className="inline-flex min-h-12 w-full items-center justify-center gap-2 bg-primary px-5 text-sm font-bold uppercase tracking-[0.1em] text-primary-foreground transition-colors hover:bg-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
+                  <Send className="size-4" aria-hidden="true" />
+                  Send message
+                </button>
+              </form>
+            </>
+          )}
+        </section>
       </div>
     </main>
   )
