@@ -140,11 +140,14 @@ export default async function ProPage() {
                 </div>
                 <div className="flex items-center justify-center border-l border-slate-700 bg-slate-950 p-5 text-white">
                   {userId ? (
-                    <form action="/api/stripe/checkout" method="post" className="grid w-full gap-2">
+                    <div className="grid w-full gap-3">
+                      <form action="/api/stripe/checkout" method="post" className="grid gap-2">
                       <button name="billing" value="monthly" className="inline-flex min-h-11 w-full items-center justify-center bg-primary px-3 py-2 text-xs font-black uppercase tracking-[0.1em] text-primary-foreground">£6 monthly</button>
                       <button name="billing" value="yearly" className="inline-flex min-h-11 w-full items-center justify-center border border-primary px-3 py-2 text-xs font-black uppercase tracking-[0.1em] text-primary">£60 yearly</button>
                       <p className="text-center text-[0.65rem] font-bold uppercase tracking-[0.08em] text-white/55">2 months free yearly</p>
-                    </form>
+                      </form>
+                      <Link href="/account/billing" className="text-center text-xs font-bold text-white/70 underline hover:text-white">Manage existing subscription</Link>
+                    </div>
                   ) : (
                     <Link href="/sign-up" className="inline-flex min-h-11 items-center justify-center bg-primary px-4 py-2 text-xs font-black uppercase tracking-[0.1em] text-primary-foreground">Create Pro account</Link>
                   )}

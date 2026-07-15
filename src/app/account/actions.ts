@@ -1,6 +1,7 @@
 "use server"
 
 import { revalidatePath } from "next/cache"
+import { redirect } from "next/navigation"
 
 import { requirePro } from "@/lib/auth"
 import { loadEditionByDate, loadEdition } from "@/lib/news"
@@ -22,14 +23,14 @@ export async function savePreferences(formData: FormData) {
   revalidatePath("/account")
 }
 
-export async function toggleBookmark(date: string, id: string) {
+export async function toggleBookmark(date: string, id: string, previousState: string, formData: FormData) {
   const { userId } = await requirePro()
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || !id || id.length > 180) throw new Error("Invalid story")
+  if (typeof previousState !== "string" || !(formData instanceof FormData) || !/^\d{4}-\d{2}-\d{2}$/.test(date) || !id || id.length > 180) throw new Error("Invalid story")
   const edition = await loadEditionByDate(date, stories)
   const story = edition?.stories.find((item) => item.id === id)
   if (!story) throw new Error("Story not found")
 
-  await updateProProfile(userId, (profile) => {
+  const profile = await updateProProfile(userId, (profile) => {
     const exists = profile.bookmarks.some((bookmark) => bookmark.date === date && bookmark.id === id)
     const bookmark: Bookmark = {
       date,
@@ -42,7 +43,8 @@ export async function toggleBookmark(date: string, id: string) {
     }
     return { ...profile, bookmarks: exists ? profile.bookmarks.filter((item) => item.date !== date || item.id !== id) : [bookmark, ...profile.bookmarks] }
   })
-  revalidatePath("/account")
+  revalidateAccount()
+  return profile.bookmarks.some((bookmark) => bookmark.date === date && bookmark.id === id) ? "Saved to bookmarks." : "Bookmark removed."
 }
 
 export async function saveSearch(formData: FormData) {
@@ -51,11 +53,19 @@ export async function saveSearch(formData: FormData) {
   if (!query || query.length > 120) throw new Error("Search must be 1–120 characters")
 
   await updateProProfile(userId, (profile) => ({ ...profile, savedSearches: [query, ...profile.savedSearches.filter((item) => item !== query)] }))
-  revalidatePath("/account")
+  revalidateAccount()
+  redirect(`/account/search?q=${encodeURIComponent(query)}&saved=1`)
 }
 
 export async function removeSearch(query: string) {
   const { userId } = await requirePro()
+  if (!query || query.length > 120) throw new Error("Invalid search")
   await updateProProfile(userId, (profile) => ({ ...profile, savedSearches: profile.savedSearches.filter((item) => item !== query) }))
+  revalidateAccount()
+}
+
+function revalidateAccount() {
   revalidatePath("/account")
+  revalidatePath("/account/search")
+  revalidatePath("/account/bookmarks")
 }

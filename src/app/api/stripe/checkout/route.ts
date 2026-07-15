@@ -4,7 +4,7 @@ import { stripe } from "@/lib/stripe"
 
 export async function POST(request: Request) {
   const { session, user } = await requireUser("/pro")
-  if (session.has({ feature: "pro" }) || hasProMetadata(user.publicMetadata)) return Response.redirect(new URL("/account", request.url), 303)
+  if (session.has({ feature: "pro" }) || hasProMetadata(user.publicMetadata)) return Response.redirect(new URL("/account/billing", request.url), 303)
 
   const form = await request.formData().catch(() => undefined)
   const priceVariable = proPriceEnvironmentVariable(form?.get("billing"))
