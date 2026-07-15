@@ -159,13 +159,6 @@
   }
 }
 
-@keyframes celebration-out {
-  to {
-    opacity: 0;
-    transform: translateY(-0.75rem) scale(0.98);
-  }
-}
-
 @keyframes confetti-fall {
   0% {
     opacity: 0;
@@ -234,8 +227,7 @@
 }
 
 .celebration-card {
-  animation: celebration-pop 480ms cubic-bezier(0.22, 1, 0.36, 1) both,
-    celebration-out 350ms ease 4.75s forwards;
+  animation: celebration-pop 480ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 .confetti-piece {
