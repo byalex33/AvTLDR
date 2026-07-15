@@ -27,7 +27,11 @@ export async function GET(request: Request) {
       revalidatePath("/")
       revalidatePath("/stories")
       revalidatePath("/archive")
+      revalidatePath("/stories/[date]/[id]", "page")
+      revalidatePath("/archive/[date]", "page")
       revalidatePath("/sitemap.xml")
+      revalidatePath("/news-sitemap.xml")
+      revalidatePath("/feed.xml")
     }
     return Response.json({
       ok: true,
