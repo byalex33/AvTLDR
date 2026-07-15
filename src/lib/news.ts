@@ -20,7 +20,6 @@ const LINKS_PER_SOURCE = 3
 const MIN_EDITION_STORIES = 12
 const MAX_EDITION_STORIES = 16
 const NORMAL_RECENCY_HOURS = 24
-const MAX_RECENCY_HOURS = 72
 const FUTURE_TOLERANCE_HOURS = 0.25
 const MAX_DATE_DISAGREEMENT_HOURS = 24
 const categories = new Set<StoryCategory>([
@@ -160,7 +159,7 @@ export async function loadEdition(fallback: Story[]): Promise<Edition> {
 
   try {
     const stored = await readEdition(BLOB_PATH)
-    return stored && isEditionSizeValid(stored.stories) ? stored : fallbackEdition
+    return stored && isEditionFresh(stored) ? stored : fallbackEdition
   } catch {
     return fallbackEdition
   }
@@ -288,7 +287,7 @@ export async function refreshNews({ dryRun = false }: { dryRun?: boolean } = {})
     diagnostics.olderCandidates = articles.length - diagnostics.recentCandidates
 
     if (articles.length < MIN_EDITION_STORIES) {
-      throw new Error(`Fewer than ${MIN_EDITION_STORIES} articles have a trustworthy publication date from the past 72 hours`)
+      throw new Error(`Fewer than ${MIN_EDITION_STORIES} articles have a trustworthy publication date from the past 24 hours`)
     }
 
     const stories = rankStories(await summarize(articles, history, geminiKey, generatedAt, diagnostics))
@@ -561,10 +560,10 @@ function validatePublicationDate({
 
 export function articleRecency(publishedAt: string, now: Date | string | number = new Date()) {
   const ageHours = articleAgeHours(publishedAt, now)
-  if (!Number.isFinite(ageHours) || ageHours < -FUTURE_TOLERANCE_HOURS || ageHours > MAX_RECENCY_HOURS) {
+  if (!Number.isFinite(ageHours) || ageHours < -FUTURE_TOLERANCE_HOURS || ageHours > NORMAL_RECENCY_HOURS) {
     return "ineligible" as const
   }
-  return ageHours <= NORMAL_RECENCY_HOURS ? "recent" as const : "older" as const
+  return "recent" as const
 }
 
 export function qualifyStoryRecency(
@@ -574,13 +573,9 @@ export function qualifyStoryRecency(
   now: Date | string | number = new Date(),
 ): { eligible: boolean; label?: StoryRecencyLabel } {
   const window = articleRecency(publishedAt, now)
-  if (window === "ineligible") return { eligible: false }
-  if (window === "recent") return { eligible: true }
-  if (recencyLabel === "Developing") return { eligible: true, label: recencyLabel }
-  if (recencyLabel === "Worth Knowing" && typeof importance === "number" && importance >= 8) {
-    return { eligible: true, label: recencyLabel }
-  }
-  return { eligible: false }
+  void recencyLabel
+  void importance
+  return window === "recent" ? { eligible: true } : { eligible: false }
 }
 
 function articleAgeHours(publishedAt: string, now: Date | string | number) {
@@ -810,9 +805,8 @@ Write a one-sentence summary, then short "what happened" and "why it matters" ex
 Use one of these categories: Airlines, Aircraft, Safety, Military, Technology.
 
 RECENCY RULES:
-- ageHours of 24 or less is part of the normal daily window; use "None" for recencyLabel.
-- ageHours over 24 and no more than 72 may be selected only if reporting is actively developing (use "Developing") or has exceptional aviation significance with importance 8 or higher (use "Worth Knowing"). Otherwise do not select it.
-- Never use "Developing" or "Worth Knowing" to rescue a merely interesting older story.
+- Select only articles with ageHours of 24 or less and use "None" for recencyLabel.
+- Never select an article older than 24 hours, including developing or unusually significant stories.
 
 REPEAT-STORY RULES:
 - Compare every candidate with PRIOR STORIES, including different URLs about the same event or announcement.
@@ -881,11 +875,7 @@ ${JSON.stringify(priorStories)}`,
       generatedAt,
     )
     if (!recency.eligible) {
-      if (articleRecency(article.publishedAt, generatedAt) === "older") {
-        diagnostics.rejectedOlderWithoutLabel++
-      } else {
-        diagnostics.rejectedInvalidSelection++
-      }
+      diagnostics.rejectedInvalidSelection++
       continue
     }
 
@@ -1104,6 +1094,12 @@ function isStoredEdition(value: unknown): value is Edition {
 
 export function isEditionSizeValid(stories: readonly unknown[]) {
   return stories.length >= MIN_EDITION_STORIES && stories.length <= MAX_EDITION_STORIES
+}
+
+export function isEditionFresh(edition: Pick<Edition, "generatedAt" | "stories">) {
+  return isEditionSizeValid(edition.stories) && edition.stories.every(
+    (story) => articleRecency(story.publishedAt, edition.generatedAt) === "recent",
+  )
 }
 
 function isStory(value: unknown, requireId = true): value is Story {

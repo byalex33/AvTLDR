@@ -243,19 +243,19 @@ export const stories: Story[] = [
     url: "https://www.aerotime.aero/articles/qantas-a321-becomes-first-freighter-to-land-at-western-sydney-international",
   },
   {
-    id: "air-zimbabwe-gatwick-return",
+    id: "gatwick-chengdu-service",
     importance: 6,
     category: "Airlines",
-    headline: "Air Zimbabwe prepares to restore London Gatwick route",
+    headline: "Air China launches Gatwick–Chengdu service",
     summary:
-      "Direct flights between Harare and London Gatwick are set to return after a 14-year break.",
+      "Air China has launched a new three-times-weekly service between London Gatwick and Chengdu Tianfu.",
     whatHappened:
-      "Plus Ultra will operate three weekly Airbus A330 services under a long-term ACMI agreement from late July.",
+      "The route began on July 12 and is Air China's third destination from Gatwick, following Beijing and Shanghai.",
     whyItMatters:
-      "The route restores direct passenger and freight connectivity between the UK and Zimbabwe.",
-    source: "UK Aviation News",
-    publishedAt: "2026-07-12T12:00:00.000Z",
-    recencyLabel: "Developing",
-    url: "https://ukaviation.aero/zimbabwe-to-london-gatwick-route-set-to-return-this-month/",
+      "The expansion reflects growing UK–China demand and strengthens Gatwick's connectivity to Asian markets.",
+    source: "Gatwick Airport",
+    publishedAt: "2026-07-14T00:00:00.000Z",
+    publicationDateSource: "structured",
+    url: "https://www.mediacentre.gatwickairport.com/news/london-gatwick-builds-on-china-network-momentum-with-new-air-china-service-to-chengdu-5d841-40f32.html",
   },
 ]

@@ -8,6 +8,7 @@ const {
   extractStoryLinks,
   findPreviousStory,
   hasSourceDiversity,
+  isEditionFresh,
   isEditionSizeValid,
   normalizeImageUrl,
   qualifyStoryRecency,
@@ -189,29 +190,23 @@ test("lower-confidence related time elements do not override article metadata", 
   })
 })
 
-test("recency windows enforce 24 hours normally and reject anything beyond 72 hours", () => {
+test("recency window rejects every article older than 24 hours", () => {
   const now = "2026-07-15T06:00:00Z"
   assert.equal(articleRecency("2026-07-14T06:00:00Z", now), "recent")
-  assert.equal(articleRecency("2026-07-14T05:59:59Z", now), "older")
-  assert.equal(articleRecency("2026-07-12T06:00:00Z", now), "older")
+  assert.equal(articleRecency("2026-07-14T05:59:59Z", now), "ineligible")
+  assert.equal(articleRecency("2026-07-12T06:00:00Z", now), "ineligible")
   assert.equal(articleRecency("2026-07-12T05:59:59Z", now), "ineligible")
   assert.equal(articleRecency("2026-07-15T06:16:00Z", now), "ineligible")
 })
 
-test("older stories require a valid Developing or high-significance Worth Knowing label", () => {
+test("recency labels cannot rescue an article older than 24 hours", () => {
   const now = "2026-07-15T06:00:00Z"
   const older = "2026-07-13T18:00:00Z"
 
   assert.deepEqual(qualifyStoryRecency(older, "None", 10, now), { eligible: false })
-  assert.deepEqual(qualifyStoryRecency(older, "Developing", 6, now), {
-    eligible: true,
-    label: "Developing",
-  })
+  assert.deepEqual(qualifyStoryRecency(older, "Developing", 10, now), { eligible: false })
   assert.deepEqual(qualifyStoryRecency(older, "Worth Knowing", 7, now), { eligible: false })
-  assert.deepEqual(qualifyStoryRecency(older, "Worth Knowing", 8, now), {
-    eligible: true,
-    label: "Worth Knowing",
-  })
+  assert.deepEqual(qualifyStoryRecency(older, "Worth Knowing", 10, now), { eligible: false })
   assert.deepEqual(qualifyStoryRecency("2026-07-15T05:00:00Z", "Developing", 9, now), {
     eligible: true,
   })
@@ -240,6 +235,13 @@ test("verified timestamps render consistently for readers", () => {
 
 test("fallback stories obey the same recency and labelling rules", () => {
   assert.equal(isEditionSizeValid(stories), true)
+  assert.equal(isEditionFresh({ generatedAt: "2026-07-14T06:00:00Z", stories }), true)
+  assert.equal(isEditionFresh({
+    generatedAt: "2026-07-14T06:00:00Z",
+    stories: stories.map((story, index) => index === 0
+      ? { ...story, publishedAt: "2026-06-23T00:00:00Z" }
+      : story),
+  }), false)
   assert.equal(hasSourceDiversity(stories), true)
   for (const story of stories) {
     assert.equal(
