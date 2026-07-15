@@ -25,11 +25,13 @@ export function SiteFooter() {
           <nav aria-label="Footer" className="text-sm">
             <p className="text-[0.68rem] font-bold uppercase tracking-[0.18em] text-primary">The small print</p>
             <div className="mt-4 flex flex-col items-start gap-3 text-white/70">
+              <Link className="hover:text-white hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary" href="/about">About AvTLDR</Link>
               <Link className="hover:text-white hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary" href="/terms">Terms</Link>
               <Link className="hover:text-white hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary" href="/privacy">Privacy</Link>
               <Link className="hover:text-white hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary" href="/contact">Contact us</Link>
               <Link className="hover:text-white hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary" href="/methodology">Methodology &amp; corrections</Link>
               <Link className="hover:text-white hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary" href="/archive">Daily archive</Link>
+              <a className="hover:text-white hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary" href="/feed.xml">RSS feed</a>
             </div>
           </nav>
 

@@ -1,13 +1,18 @@
 import type { Metadata } from "next"
 
 export const SITE_URL = "https://avtldr.news"
+export const SITE_NAME = "AvTLDR"
+export const EDITORIAL_NAME = "AvTLDR Editorial Desk"
 export const SITE_DESCRIPTION = "Daily global aviation news, distilled into the stories that matter and why they matter."
 
 export function pageMetadata(title: string, description: string, path: string): Metadata {
   return {
     title,
     description,
-    alternates: { canonical: path },
+    alternates: {
+      canonical: path,
+      types: { "application/rss+xml": `${SITE_URL}/feed.xml` },
+    },
     openGraph: {
       title,
       description,

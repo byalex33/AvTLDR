@@ -15,12 +15,52 @@ const {
 } = await import("../src/lib/news.ts")
 const { browseStories, formatStoryPublishedAt, stories, storyPath } = await import("../src/lib/stories.ts")
 const { formatUpdateCountdown } = await import("../src/lib/update-countdown.ts")
+const { newsSitemapXml, rssXml } = await import("../src/lib/discovery.ts")
+const { INDEX_NOW_KEY, indexNowPayload } = await import("../src/lib/index-now.ts")
 
 test("countdown targets the next 06:00 UTC refresh", () => {
   assert.equal(formatUpdateCountdown(Date.parse("2026-07-14T05:00:00Z")), "01H 00M")
   assert.equal(formatUpdateCountdown(Date.parse("2026-07-14T06:00:00Z")), "24H 00M")
   assert.equal(formatUpdateCountdown(Date.parse("2026-07-14T07:30:00Z")), "22H 30M")
   assert.equal(formatUpdateCountdown(Date.parse("2026-07-14T05:59:30Z")), "00H 01M")
+})
+
+test("news sitemap exposes only the current edition with valid escaped metadata", () => {
+  const edition = {
+    generatedAt: "2026-07-14T06:00:00Z",
+    stories: [{ ...stories[0], headline: "Orders & deliveries <today>" }, ...stories.slice(1)],
+  }
+  const xml = newsSitemapXml(edition, new Date("2026-07-15T06:00:00Z"))
+
+  assert.equal((xml.match(/<news:news>/g) ?? []).length, stories.length)
+  assert.match(xml, /https:\/\/avtldr\.news\/stories\/2026-07-14\//)
+  assert.match(xml, /Orders &amp; deliveries &lt;today&gt;/)
+  assert.doesNotMatch(xml, /https:\/\/www\.avtldr\.news/)
+
+  const staleXml = newsSitemapXml(edition, new Date("2026-07-16T06:00:01Z"))
+  assert.equal((staleXml.match(/<news:news>/g) ?? []).length, 0)
+})
+
+test("RSS feed publishes every briefing item on the apex domain", () => {
+  const xml = rssXml({ generatedAt: "2026-07-14T06:00:00Z", stories })
+
+  assert.equal((xml.match(/<item>/g) ?? []).length, stories.length)
+  assert.match(xml, /<atom:link href="https:\/\/avtldr\.news\/feed\.xml"/)
+  assert.doesNotMatch(xml, /https:\/\/www\.avtldr\.news/)
+})
+
+test("IndexNow payload rejects off-site URLs and points to the public key", () => {
+  const payload = indexNowPayload([
+    "https://avtldr.news/",
+    "https://avtldr.news/stories",
+    "https://avtldr.news/stories",
+    "https://example.com/not-ours",
+    "invalid",
+  ])
+
+  assert.deepEqual(payload.urlList, ["https://avtldr.news/", "https://avtldr.news/stories"])
+  assert.equal(payload.host, "avtldr.news")
+  assert.equal(payload.keyLocation, `https://avtldr.news/${INDEX_NOW_KEY}.txt`)
 })
 
 test("extractStoryLinks keeps publisher articles and rejects unrelated links", () => {

@@ -1,6 +1,11 @@
 {
-  "name": "MyWebSite",
-  "short_name": "MySite",
+  "name": "AvTLDR.news — Daily Aviation Briefing",
+  "short_name": "AvTLDR",
+  "description": "Daily global aviation news, distilled into the stories that matter and why they matter.",
+  "start_url": "/",
+  "scope": "/",
+  "lang": "en-GB",
+  "categories": ["news", "aviation"],
   "icons": [
     {
       "src": "/web-app-manifest-192x192.png",
@@ -15,7 +20,7 @@
       "purpose": "maskable"
     }
   ],
-  "theme_color": "#ffffff",
-  "background_color": "#ffffff",
+  "theme_color": "#f5f2eb",
+  "background_color": "#f5f2eb",
   "display": "standalone"
 }

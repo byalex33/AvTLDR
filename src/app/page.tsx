@@ -4,7 +4,7 @@ import { Plane } from "lucide-react"
 import { NewsFeed } from "@/components/news-feed"
 import { UpdateCountdown } from "@/components/update-countdown"
 import { editionDay, formatEditionDate, formatEditionTimestamp, loadEdition } from "@/lib/news"
-import { SITE_DESCRIPTION, SITE_URL } from "@/lib/seo"
+import { SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/seo"
 import { stories } from "@/lib/stories"
 
 export const revalidate = 3600
@@ -14,12 +14,17 @@ const jsonLd = [
     "@context": "https://schema.org",
     "@type": "NewsMediaOrganization",
     "@id": `${SITE_URL}/#organization`,
-    name: "AvTLDR",
+    name: SITE_NAME,
     alternateName: "AvTLDR.news",
     url: SITE_URL,
     logo: `${SITE_URL}/web-app-manifest-512x512.png`,
     email: "contact@avtldr.news",
     description: SITE_DESCRIPTION,
+    publishingPrinciples: `${SITE_URL}/methodology`,
+    ethicsPolicy: `${SITE_URL}/methodology`,
+    correctionsPolicy: `${SITE_URL}/methodology#corrections`,
+    masthead: `${SITE_URL}/about`,
+    foundingLocation: { "@type": "Country", name: "United Kingdom" },
   },
   {
     "@context": "https://schema.org",

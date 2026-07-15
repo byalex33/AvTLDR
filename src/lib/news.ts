@@ -1,11 +1,15 @@
 import { get, list, put } from "@vercel/blob"
 
+import { notifyIndexNow } from "./index-now.ts"
+import { SITE_URL } from "./seo.ts"
+
 import {
   previewGeneratedAt,
   type PublicationDateSource,
   type Story,
   type StoryCategory,
   type StoryRecencyLabel,
+  storyPath,
 } from "./stories.ts"
 
 const BLOB_PATH = "avtldr/stories.json"
@@ -303,6 +307,20 @@ export async function refreshNews({ dryRun = false }: { dryRun?: boolean } = {})
       await put(`${ARCHIVE_PREFIX}${editionDay(edition.generatedAt)}.json`, body, blobOptions)
       await put(BLOB_PATH, body, blobOptions)
       await put(HISTORY_PATH, JSON.stringify(mergeStoryHistory(history, edition)), blobOptions)
+      const date = editionDay(edition.generatedAt)
+      try {
+        await notifyIndexNow([
+          SITE_URL,
+          `${SITE_URL}/stories`,
+          `${SITE_URL}/archive/${date}`,
+          `${SITE_URL}/sitemap.xml`,
+          `${SITE_URL}/news-sitemap.xml`,
+          `${SITE_URL}/feed.xml`,
+          ...edition.stories.map((story) => `${SITE_URL}${storyPath(date, story.id)}`),
+        ])
+      } catch (error) {
+        console.error("IndexNow notification failed", error)
+      }
     }
 
     diagnostics.status = dryRun ? "dry-run" : "published"
@@ -1052,7 +1070,7 @@ function topicTokens(value: string) {
   )
 }
 
-async function loadArchiveEdition(date: string) {
+export async function loadArchiveEdition(date: string) {
   if (!hasBlobStore()) return undefined
   try {
     return await readEdition(`${ARCHIVE_PREFIX}${date}.json`)

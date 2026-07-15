@@ -5,8 +5,8 @@ import { notFound } from "next/navigation"
 
 import { ShareButton } from "@/components/share-button"
 import { SourceLink, StoryMeta } from "@/components/news-feed"
-import { editionDay, formatEditionDate, loadEdition, loadEditionByDate } from "@/lib/news"
-import { SITE_URL } from "@/lib/seo"
+import { editionDay, formatEditionDate, formatEditionTimestamp, loadEdition, loadEditionByDate } from "@/lib/news"
+import { EDITORIAL_NAME, SITE_NAME, SITE_URL } from "@/lib/seo"
 import { stories, storyPath } from "@/lib/stories"
 
 export const revalidate = 3600
@@ -25,12 +25,15 @@ export async function generateMetadata({ params }: PageProps<"/stories/[date]/[i
   if (!story) return {}
   const path = storyPath(date, id)
   const image = `${path}/opengraph-image`
-  const publishedTime = Number.isNaN(Date.parse(story.publishedAt)) ? edition.generatedAt : story.publishedAt
+  const publishedTime = edition.generatedAt
 
   return {
     title: story.headline,
     description: story.summary,
-    alternates: { canonical: path },
+    alternates: {
+      canonical: path,
+      types: { "application/rss+xml": `${SITE_URL}/feed.xml` },
+    },
     openGraph: {
       title: story.headline,
       description: story.summary,
@@ -57,7 +60,7 @@ export default async function StoryPage({ params }: PageProps<"/stories/[date]/[
   if (!edition || !story) notFound()
 
   const path = storyPath(date, id)
-  const publishedTime = Number.isNaN(Date.parse(story.publishedAt)) ? edition.generatedAt : story.publishedAt
+  const publishedTime = edition.generatedAt
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "NewsArticle",
@@ -66,11 +69,29 @@ export default async function StoryPage({ params }: PageProps<"/stories/[date]/[
     image: story.imageUrl ? [story.imageUrl] : [`${SITE_URL}${path}/opengraph-image`],
     datePublished: publishedTime,
     dateModified: edition.generatedAt,
+    inLanguage: "en-GB",
+    isAccessibleForFree: true,
     articleSection: story.category,
-    mainEntityOfPage: `${SITE_URL}${path}`,
+    mainEntityOfPage: { "@type": "WebPage", "@id": `${SITE_URL}${path}` },
     isBasedOn: story.url,
-    author: { "@id": `${SITE_URL}/#organization` },
-    publisher: { "@id": `${SITE_URL}/#organization` },
+    citation: story.url,
+    author: {
+      "@type": "Organization",
+      name: EDITORIAL_NAME,
+      url: `${SITE_URL}/about`,
+    },
+    publisher: {
+      "@type": "Organization",
+      "@id": `${SITE_URL}/#organization`,
+      name: SITE_NAME,
+      url: SITE_URL,
+      logo: {
+        "@type": "ImageObject",
+        url: `${SITE_URL}/web-app-manifest-512x512.png`,
+        width: 512,
+        height: 512,
+      },
+    },
   }
 
   return (
@@ -94,6 +115,11 @@ export default async function StoryPage({ params }: PageProps<"/stories/[date]/[
         <article>
           <p className="text-xs font-bold uppercase tracking-[0.2em] text-primary">{story.category} · {formatEditionDate(edition.generatedAt)}</p>
           <h1 className="mt-5 max-w-4xl font-serif text-4xl leading-[1.02] font-bold tracking-[-0.045em] text-balance sm:text-7xl sm:leading-[0.98]">{story.headline}</h1>
+          <p className="mt-5 text-sm leading-6 text-muted-foreground">
+            By <Link className="font-semibold text-foreground underline underline-offset-4" href="/about">{EDITORIAL_NAME}</Link>
+            <span aria-hidden="true"> · </span>
+            <time dateTime={edition.generatedAt}>Published {formatEditionTimestamp(edition.generatedAt)}</time>
+          </p>
           <p className="mt-7 max-w-3xl text-lg leading-8 text-muted-foreground sm:text-xl sm:leading-9">{story.summary}</p>
 
           {story.imageUrl && <div className="mt-10 aspect-[16/9] bg-slate-950 bg-cover bg-center" aria-hidden="true" style={{ backgroundImage: `url("${story.imageUrl}")` }} />}

@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next"
 
 import { SiteFooter } from "@/components/site-footer"
-import { SITE_DESCRIPTION, SITE_URL } from "@/lib/seo"
+import { EDITORIAL_NAME, SITE_DESCRIPTION, SITE_URL } from "@/lib/seo"
 
 import "./globals.css"
 
@@ -15,8 +15,12 @@ export const metadata: Metadata = {
   applicationName: "AvTLDR.news",
   creator: "AvTLDR.news",
   publisher: "AvTLDR.news",
+  authors: [{ name: EDITORIAL_NAME, url: "/about" }],
   category: "news",
-  alternates: { canonical: "/" },
+  alternates: {
+    canonical: "/",
+    types: { "application/rss+xml": `${SITE_URL}/feed.xml` },
+  },
   openGraph: {
     title: "AvTLDR.news — Daily Global Aviation News, Distilled",
     description: SITE_DESCRIPTION,
@@ -48,7 +52,7 @@ export const metadata: Metadata = {
     ],
     apple: "/apple-touch-icon.png?v=2",
   },
-  manifest: "/site.webmanifest?v=2",
+  manifest: "/site.webmanifest?v=3",
 }
 
 export const viewport: Viewport = {
@@ -58,7 +62,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className="h-full antialiased">
+    <html lang="en-GB" className="h-full antialiased">
       <body className="min-h-full">
         {children}
         <SiteFooter />
