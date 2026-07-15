@@ -46,6 +46,7 @@ const sources: readonly { name: string; url: string; direct?: boolean }[] = [
   { name: "Aviation International News", url: "https://www.ainonline.com/" },
   { name: "Skift Airlines", url: "https://skift.com/airlines/" },
   { name: "General Aviation News", url: "https://generalaviationnews.com/" },
+  { name: "Reuters", url: "https://www.reuters.com/business/aerospace-defense/" },
 
   // Incidents and aviation safety
   { name: "The Aviation Herald", url: "https://avherald.com/", direct: true },
