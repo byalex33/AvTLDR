@@ -192,6 +192,17 @@ export async function loadEdition(fallback: Story[]): Promise<Edition> {
   }
 }
 
+export async function saveEdition(edition: Edition) {
+  if (!hasBlobStore()) throw new Error("A Vercel Blob store is required to edit posts")
+  if (!isStoredEdition(edition)) throw new Error("Invalid edition")
+
+  const body = JSON.stringify({ ...edition, stories: rankStories(edition.stories) })
+  await Promise.all([
+    put(BLOB_PATH, body, blobOptions),
+    put(`${ARCHIVE_PREFIX}${editionDay(edition.generatedAt)}.json`, body, blobOptions),
+  ])
+}
+
 export async function loadEditionByDate(date: string, fallback: Story[]) {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return undefined
   const current = await loadEdition(fallback)
@@ -1224,7 +1235,7 @@ export function isEditionFresh(edition: Pick<Edition, "generatedAt" | "stories">
   )
 }
 
-function isStory(value: unknown, requireId = true): value is Story {
+export function isStory(value: unknown, requireId = true): value is Story {
   if (!value || typeof value !== "object") return false
   const story = value as Partial<Story>
   return (

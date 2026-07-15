@@ -7,6 +7,10 @@ export function hasProMetadata(metadata: UserPublicMetadata) {
   return metadata.plan === "pro"
 }
 
+export function hasAdminMetadata(metadata: UserPublicMetadata) {
+  return metadata.role === "admin"
+}
+
 export async function requireUser(returnBackUrl: string) {
   const session = await auth()
   if (!session.userId) return session.redirectToSignIn({ returnBackUrl })
@@ -25,7 +29,7 @@ export async function requireAdmin() {
   const session = await auth()
   if (!session.userId) return session.redirectToSignIn({ returnBackUrl: "/admin" })
 
-  const admins = new Set((process.env.ADMIN_USER_IDS ?? "").split(",").map((id) => id.trim()).filter(Boolean))
-  if (!admins.has(session.userId)) redirect("/")
+  const user = await (await clerkClient()).users.getUser(session.userId)
+  if (!hasAdminMetadata(user.publicMetadata)) redirect("/")
   return session.userId
 }

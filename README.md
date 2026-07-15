@@ -21,8 +21,9 @@ Copy `.env.example` to `.env.local` and provide:
 - `BLOB_READ_WRITE_TOKEN` from a Vercel Blob store
 - `RESEND_API_KEY` with full access for contact-form delivery and newsletter signups
 - `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` and `CLERK_SECRET_KEY` from Clerk
-- `ADMIN_USER_IDS`, a comma-separated list of Clerk user IDs allowed to open `/admin`
 - `STRIPE_SECRET_KEY`, `STRIPE_PRO_PRICE_ID`, `STRIPE_PRO_YEARLY_PRICE_ID`, and `STRIPE_WEBHOOK_SECRET` for the monthly and yearly recurring GBP Pro prices
+
+Set `role` to `admin` in a user's Clerk public metadata to allow that user to open `/admin` and manage posts, subscriptions, and accounts.
 
 Send `checkout.session.completed`, `customer.subscription.updated`, `customer.subscription.deleted`, `invoice.paid`, and `invoice.payment_failed` to `/api/stripe/webhook`, and enable the Stripe Customer Portal. The webhook uses the private Vercel Blob store for durable event deduplication, so production billing requires that store.
 

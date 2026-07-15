@@ -11,6 +11,7 @@ const {
   hasSourceDiversity,
   isEditionFresh,
   isEditionSizeValid,
+  isStory,
   LIVE_SEARCH_DOMAINS,
   LIVE_SEARCH_QUERIES,
   liveSearchRequest,
@@ -29,6 +30,12 @@ test("countdown targets the next 06:00 UTC refresh", () => {
   assert.equal(formatUpdateCountdown(Date.parse("2026-07-14T06:00:00Z")), "24H 00M")
   assert.equal(formatUpdateCountdown(Date.parse("2026-07-14T07:30:00Z")), "22H 30M")
   assert.equal(formatUpdateCountdown(Date.parse("2026-07-14T05:59:30Z")), "00H 01M")
+})
+
+test("admin post validation rejects malformed corrections", () => {
+  assert.equal(isStory(stories[0]), true)
+  assert.equal(isStory({ ...stories[0], importance: 11 }), false)
+  assert.equal(isStory({ ...stories[0], url: "" }), false)
 })
 
 test("news sitemap exposes only the current edition with valid escaped metadata", () => {
