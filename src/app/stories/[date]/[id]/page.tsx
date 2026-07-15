@@ -25,6 +25,7 @@ export async function generateMetadata({ params }: PageProps<"/stories/[date]/[i
   if (!story) return {}
   const path = storyPath(date, id)
   const image = `${path}/opengraph-image`
+  const publishedTime = Number.isNaN(Date.parse(story.publishedAt)) ? edition.generatedAt : story.publishedAt
 
   return {
     title: story.headline,
@@ -37,7 +38,7 @@ export async function generateMetadata({ params }: PageProps<"/stories/[date]/[i
       siteName: "AvTLDR.news",
       locale: "en_GB",
       type: "article",
-      publishedTime: edition.generatedAt,
+      publishedTime,
       images: [{ url: image, width: 1200, height: 630, alt: story.headline }],
     },
     twitter: {
@@ -56,13 +57,14 @@ export default async function StoryPage({ params }: PageProps<"/stories/[date]/[
   if (!edition || !story) notFound()
 
   const path = storyPath(date, id)
+  const publishedTime = Number.isNaN(Date.parse(story.publishedAt)) ? edition.generatedAt : story.publishedAt
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "NewsArticle",
     headline: story.headline,
     description: story.summary,
     image: story.imageUrl ? [story.imageUrl] : [`${SITE_URL}${path}/opengraph-image`],
-    datePublished: edition.generatedAt,
+    datePublished: publishedTime,
     dateModified: edition.generatedAt,
     articleSection: story.category,
     mainEntityOfPage: `${SITE_URL}${path}`,

@@ -7,7 +7,7 @@ import { ArrowRight, ArrowUpRight, CalendarDays, Newspaper, Plane, Shield } from
 import { Button } from "@/components/ui/button"
 import { ShareButton } from "@/components/share-button"
 import { Switch } from "@/components/ui/switch"
-import { storyPath, type Story, type StoryCategory } from "@/lib/stories"
+import { formatStoryPublishedAt, storyPath, type Story, type StoryCategory } from "@/lib/stories"
 
 const categories: Array<"All" | StoryCategory> = [
   "All",
@@ -205,13 +205,18 @@ function StoryPoint({ label, text, compact = false }: { label: string; text: str
 export function StoryMeta({ story }: { story: Story }) {
   return (
     <div className="flex flex-wrap items-center gap-2">
+      {story.recencyLabel && (
+        <span className="inline-flex items-center rounded-full bg-primary px-2.5 py-1 text-xs font-bold text-primary-foreground ring-1 ring-primary">
+          {story.recencyLabel}
+        </span>
+      )}
       <span className="inline-flex items-center gap-1.5 rounded-full bg-secondary px-2.5 py-1 text-xs font-semibold text-muted-foreground ring-1 ring-foreground/10">
         <Newspaper className="size-3.5 text-primary" aria-hidden="true" />
         {story.source}
       </span>
       <span className="inline-flex items-center gap-1.5 rounded-full bg-secondary px-2.5 py-1 text-xs font-semibold text-muted-foreground ring-1 ring-foreground/10">
         <CalendarDays className="size-3.5 text-primary" aria-hidden="true" />
-        {story.publishedAt}
+        {formatStoryPublishedAt(story.publishedAt)}
       </span>
     </div>
   )

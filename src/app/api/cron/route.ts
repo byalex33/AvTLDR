@@ -1,6 +1,6 @@
 import { revalidatePath } from "next/cache"
 
-import { refreshNews } from "@/lib/news"
+import { loadRefreshDiagnostics, NewsRefreshError, refreshNews } from "@/lib/news"
 
 export const maxDuration = 300
 
@@ -11,15 +11,37 @@ export async function GET(request: Request) {
     return Response.json({ error: "Unauthorized" }, { status: 401 })
   }
 
+  const searchParams = new URL(request.url).searchParams
+  if (searchParams.get("diagnostics") === "1") {
+    const diagnostics = await loadRefreshDiagnostics()
+    return diagnostics
+      ? Response.json({ ok: true, diagnostics })
+      : Response.json({ error: "No refresh diagnostics are available" }, { status: 404 })
+  }
+
+  const dryRun = searchParams.get("dryRun") === "1"
+
   try {
-    const edition = await refreshNews()
-    revalidatePath("/")
-    revalidatePath("/stories")
-    revalidatePath("/archive")
-    revalidatePath("/sitemap.xml")
-    return Response.json({ ok: true, generatedAt: edition.generatedAt, stories: edition.stories.length })
+    const { edition, diagnostics } = await refreshNews({ dryRun })
+    if (!dryRun) {
+      revalidatePath("/")
+      revalidatePath("/stories")
+      revalidatePath("/archive")
+      revalidatePath("/sitemap.xml")
+    }
+    return Response.json({
+      ok: true,
+      dryRun,
+      generatedAt: edition.generatedAt,
+      stories: edition.stories.length,
+      diagnostics,
+      ...(dryRun ? { edition } : {}),
+    })
   } catch (error) {
     console.error(error)
-    return Response.json({ error: "Daily refresh failed; the previous edition is unchanged" }, { status: 500 })
+    return Response.json({
+      error: "Daily refresh failed; the previous edition is unchanged",
+      ...(error instanceof NewsRefreshError ? { diagnostics: error.diagnostics } : {}),
+    }, { status: 500 })
   }
 }
