@@ -21,7 +21,7 @@ Copy `.env.example` to `.env.local` and provide:
 - `BLOB_READ_WRITE_TOKEN` from a Vercel Blob store
 - `RESEND_API_KEY` with full access for contact-form delivery and newsletter signups
 
-Vercel calls `/api/cron` daily at 06:00 UTC. The endpoint inspects up to three article links per publisher, sends the qualifying batch to Gemini, validates the result, stores `avtldr/stories.json`, and revalidates the homepage. Each run also stores its filtering and selection counts in `avtldr/refresh-diagnostics.json`.
+Vercel calls `/api/cron` daily at 06:00 UTC. The endpoint inspects up to three article links per publisher, sends the qualifying batch to Gemini, validates the result, stores `avtldr/stories.json`, and revalidates the homepage. An edition is published only when 12–16 stories qualify; otherwise, the previous complete edition remains live. Each run also stores its filtering and selection counts in `avtldr/refresh-diagnostics.json`.
 
 Authenticated maintenance modes:
 

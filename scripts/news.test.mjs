@@ -8,6 +8,7 @@ const {
   extractStoryLinks,
   findPreviousStory,
   hasSourceDiversity,
+  isEditionSizeValid,
   normalizeImageUrl,
   qualifyStoryRecency,
   rankStories,
@@ -198,7 +199,8 @@ test("verified timestamps render consistently for readers", () => {
 })
 
 test("fallback stories obey the same recency and labelling rules", () => {
-  assert.ok(stories.length > 0)
+  assert.equal(isEditionSizeValid(stories), true)
+  assert.equal(hasSourceDiversity(stories), true)
   for (const story of stories) {
     assert.equal(
       qualifyStoryRecency(

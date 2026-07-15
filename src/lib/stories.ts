@@ -147,6 +147,102 @@ export const stories: Story[] = [
     imageUrl: "https://avweb.com/wp-content/uploads/2026/07/Screenshot-2026-07-10-at-10.12.25-AM.png",
   },
   {
+    id: "flamingo-air-aoc-suspended",
+    importance: 9,
+    category: "Safety",
+    headline: "Flamingo Air certificate suspended after fatal crash",
+    summary:
+      "Bahamian regulators suspended Flamingo Air's operating certificate while investigators examine a fatal Cessna 402 crash.",
+    whatHappened:
+      "All 10 people aboard the July 10 flight were killed, and the regulator cited that crash plus a separate engine problem involving the airline that day.",
+    whyItMatters:
+      "Grounding the carrier is a significant precaution while investigators assess two safety events involving one operator on the same day.",
+    source: "Aviation Week",
+    publishedAt: "2026-07-13T22:09:24.000Z",
+    publicationDateSource: "structured",
+    url: "https://aviationweek.com/air-transport/safety-ops-regulation/flamingo-air-aoc-temporarily-suspended-following-fatal-crash",
+  },
+  {
+    id: "korean-air-quarterly-loss",
+    importance: 7,
+    category: "Airlines",
+    headline: "Fuel surge pushes Korean Air to quarterly loss",
+    summary:
+      "Korean Air reported a $65.1 million second-quarter loss as fuel costs and Middle East disruption hit profitability.",
+    whatHappened:
+      "Fuel spending more than doubled year on year and operating expenses rose 32.6%, although the airline remained profitable across the first half.",
+    whyItMatters:
+      "The reversal shows how renewed fuel and geopolitical pressure is flowing directly into major airline results and fares.",
+    source: "Aviation Week",
+    publishedAt: "2026-07-13T13:32:42.000Z",
+    publicationDateSource: "structured",
+    url: "https://aviationweek.com/air-transport/airlines-lessors/soaring-fuel-prices-hurt-korean-airs-profitability",
+  },
+  {
+    id: "rtx-high-density-electric-motor",
+    importance: 6,
+    category: "Technology",
+    headline: "RTX runs high-density electric aviation motor",
+    summary:
+      "RTX has operated a 250-kW aviation motor designed to deliver unusually high power without the usual weight penalty.",
+    whatHappened:
+      "The ARPA-E-backed demonstrator achieved a reported power density of 14.4 kW per kilogram as part of the Ultra-Compact project.",
+    whyItMatters:
+      "Lighter electric propulsion is a key enabling technology for practical hybrid and electric aircraft with useful payload and range.",
+    source: "Aviation Week",
+    publishedAt: "2026-07-13T21:13:12.000Z",
+    publicationDateSource: "structured",
+    url: "https://aviationweek.com/aerospace/emerging-technologies/rtx-runs-high-power-density-electric-motor-aviation",
+  },
+  {
+    id: "riyadh-air-china-approval",
+    importance: 6,
+    category: "Airlines",
+    headline: "Riyadh Air cleared to launch Beijing and Shanghai flights",
+    summary:
+      "China's aviation regulator approved Riyadh Air passenger and cargo services to Beijing and Shanghai.",
+    whatHappened:
+      "The approvals allow three weekly Riyadh-Beijing flights and four weekly Riyadh-Shanghai flights, although launch dates remain unannounced.",
+    whyItMatters:
+      "Direct China access advances the startup's international expansion and adds new competition to a market currently led by Saudia.",
+    source: "Aviation Week",
+    publishedAt: "2026-07-13T14:30:54.000Z",
+    publicationDateSource: "structured",
+    url: "https://aviationweek.com/air-transport/airports-networks/riyadh-air-cleared-regulator-china-debut",
+  },
+  {
+    id: "air-canada-iamaw-deal",
+    importance: 5,
+    category: "Airlines",
+    headline: "Air Canada and IAMAW reach tentative four-year deal",
+    summary:
+      "Air Canada reached a tentative collective agreement covering about 11,000 technical and operational employees.",
+    whatHappened:
+      "The four-year deal covers maintenance, airports, cargo, logistics and supply employees and remains subject to union ratification.",
+    whyItMatters:
+      "Ratification would remove a major labour risk across maintenance and ground operations at Canada's largest airline.",
+    source: "AeroTime",
+    publishedAt: "2026-07-13T14:17:22.000Z",
+    publicationDateSource: "structured",
+    url: "https://www.aerotime.aero/articles/air-canada-iamaw-reach-tentative-deal-covering-11000-maintenance-workers",
+  },
+  {
+    id: "qantas-western-sydney-freighter",
+    importance: 5,
+    category: "Aircraft",
+    headline: "Qantas A321 freighter completes Western Sydney trial",
+    summary:
+      "A Qantas A321 became the first freighter to land at Western Sydney International ahead of regular cargo operations.",
+    whatHappened:
+      "The readiness flight tested aircraft handling, ground systems and cargo transfers before domestic freighter services begin on July 27.",
+    whyItMatters:
+      "The trial is a practical milestone for Australia's newest major airport and its planned 24-hour freight operation.",
+    source: "AeroTime",
+    publishedAt: "2026-07-13T11:30:39.000Z",
+    publicationDateSource: "structured",
+    url: "https://www.aerotime.aero/articles/qantas-a321-becomes-first-freighter-to-land-at-western-sydney-international",
+  },
+  {
     id: "air-zimbabwe-gatwick-return",
     importance: 6,
     category: "Airlines",
