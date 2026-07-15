@@ -173,36 +173,36 @@
   }
 }
 
-@property --thanks-angle {
+@property --pro-angle {
   syntax: "<angle>";
   inherits: false;
   initial-value: 0deg;
 }
 
-@keyframes thanks-glow-spin {
+@keyframes pro-glow-spin {
   to {
-    --thanks-angle: 360deg;
+    --pro-angle: 360deg;
   }
 }
 
-.say-thanks-glow {
+.pro-glow {
   position: relative;
   isolation: isolate;
   color: white;
 }
 
-.say-thanks-glow::before,
-.say-thanks-glow::after {
+.pro-glow::before,
+.pro-glow::after {
   position: absolute;
   content: "";
   pointer-events: none;
 }
 
-.say-thanks-glow::before {
+.pro-glow::before {
   inset: -2px;
   z-index: -2;
   background: conic-gradient(
-    from var(--thanks-angle),
+    from var(--pro-angle),
     transparent 8%,
     var(--primary) 28%,
     oklch(0.84 0.16 80) 42%,
@@ -212,18 +212,86 @@
     transparent 92%
   );
   box-shadow: 0 0 1.25rem color-mix(in oklch, var(--primary) 55%, transparent);
-  animation: thanks-glow-spin 4s linear infinite;
+  animation: pro-glow-spin 4s linear infinite;
 }
 
-.say-thanks-glow::after {
+.pro-glow::after {
   inset: 0;
   z-index: -1;
   background: oklch(0.129 0.042 264);
   transition: background-color 200ms ease;
 }
 
-.say-thanks-glow:hover::after {
+.pro-glow:hover::after {
   background: color-mix(in oklch, oklch(0.129 0.042 264) 78%, var(--primary));
+}
+
+@keyframes pro-status-border {
+  to {
+    background-position: 0 0, 200% 50%;
+  }
+}
+
+@keyframes pro-status-shimmer {
+  0%,
+  48% {
+    transform: translateX(-220%) skewX(-20deg);
+  }
+  72%,
+  100% {
+    transform: translateX(650%) skewX(-20deg);
+  }
+}
+
+@keyframes pro-status-plane {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 0.2rem color-mix(in oklch, var(--primary) 55%, transparent));
+    transform: translateY(0) rotate(-12deg);
+  }
+  50% {
+    filter: drop-shadow(0 0 0.65rem color-mix(in oklch, var(--primary) 90%, white));
+    transform: translateY(-0.15rem) rotate(-7deg);
+  }
+}
+
+.pro-status {
+  position: relative;
+  isolation: isolate;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  overflow: hidden;
+  border: 1px solid transparent;
+  background:
+    linear-gradient(120deg, oklch(0.18 0.04 258), oklch(0.105 0.032 264)) padding-box,
+    linear-gradient(90deg, var(--primary), white, oklch(0.86 0.17 78), var(--primary), white, var(--primary)) border-box;
+  background-position: 0 0, 0% 50%;
+  background-size: 100% 100%, 300% 100%;
+  color: white;
+  box-shadow:
+    0 0 1.75rem color-mix(in oklch, var(--primary) 48%, transparent),
+    inset 0 0 1.2rem rgb(255 255 255 / 0.06);
+  animation: pro-status-border 3.5s linear infinite;
+}
+
+.pro-status__shine {
+  position: absolute;
+  z-index: 5;
+  inset-block: 0;
+  left: 0;
+  width: 18%;
+  background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.6), transparent);
+  pointer-events: none;
+  animation: pro-status-shimmer 3.4s ease-in-out infinite;
+}
+
+.pro-status__plane {
+  position: relative;
+  z-index: 10;
+  flex: none;
+  color: var(--primary);
+  animation: pro-status-plane 1.8s ease-in-out infinite;
 }
 
 .celebration-card {

@@ -51,8 +51,13 @@ export default async function Home() {
       <header>
         <div className="bg-slate-950 text-white">
           <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-2 text-[0.68rem] font-semibold uppercase tracking-[0.12em] sm:px-6 sm:tracking-[0.18em] lg:px-8">
-            <p>Aviation intelligence, distilled daily</p>
-            <UpdateCountdown />
+            <p className="hidden sm:block">Aviation intelligence, distilled daily</p>
+            <div className="flex w-full items-center justify-between gap-5 sm:w-auto sm:justify-end">
+              <Link href="/pro" className="text-primary hover:text-white hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
+                Become Pro
+              </Link>
+              <UpdateCountdown />
+            </div>
           </div>
         </div>
 

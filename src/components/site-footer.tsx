@@ -12,14 +12,12 @@ export function SiteFooter() {
             <p className="mt-3 max-w-sm text-sm leading-6 text-white/60">
               A clearer view of the global aviation industry, delivered once a day.
             </p>
-            <a
-              href="https://ko-fi.com/alexb3"
-              target="_blank"
-              rel="noreferrer"
-              className="say-thanks-glow mt-5 inline-flex min-h-11 items-center px-4 py-2 text-xs font-bold uppercase tracking-[0.12em] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+            <Link
+              href="/pro"
+              className="pro-glow mt-5 inline-flex min-h-11 items-center px-4 py-2 text-xs font-bold uppercase tracking-[0.12em] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
             >
-              Say thanks ☕
-            </a>
+              Become Pro →
+            </Link>
           </div>
 
           <nav aria-label="Footer" className="text-sm">
@@ -31,6 +29,7 @@ export function SiteFooter() {
               <Link className="hover:text-white hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary" href="/contact">Contact us</Link>
               <Link className="hover:text-white hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary" href="/methodology">Methodology &amp; corrections</Link>
               <Link className="hover:text-white hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary" href="/archive">Daily archive</Link>
+              <Link className="hover:text-white hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary" href="/pro">AvTLDR Pro</Link>
               <a className="hover:text-white hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary" href="/feed.xml">RSS feed</a>
             </div>
           </nav>
