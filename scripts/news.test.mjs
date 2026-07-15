@@ -4,15 +4,20 @@ import test from "node:test"
 const {
   articleRecency,
   extractDirectStoryLinks,
+  extractLiveSearchCandidates,
   extractPublicationDate,
   extractStoryLinks,
   findPreviousStory,
   hasSourceDiversity,
   isEditionFresh,
   isEditionSizeValid,
+  LIVE_SEARCH_DOMAINS,
+  LIVE_SEARCH_QUERIES,
+  liveSearchRequest,
   normalizeImageUrl,
   qualifyStoryRecency,
   rankStories,
+  sourceNameForUrl,
 } = await import("../src/lib/news.ts")
 const { browseStories, formatStoryPublishedAt, stories, storyPath } = await import("../src/lib/stories.ts")
 const { formatUpdateCountdown } = await import("../src/lib/update-countdown.ts")
@@ -62,6 +67,52 @@ test("IndexNow payload rejects off-site URLs and points to the public key", () =
   assert.deepEqual(payload.urlList, ["https://avtldr.news/", "https://avtldr.news/stories"])
   assert.equal(payload.host, "avtldr.news")
   assert.equal(payload.keyLocation, `https://avtldr.news/${INDEX_NOW_KEY}.txt`)
+})
+
+test("live search uses targeted 24-hour news and web discovery across configured publishers", () => {
+  assert.equal(LIVE_SEARCH_QUERIES.length, 4)
+  assert.equal(LIVE_SEARCH_DOMAINS.includes("reuters.com"), true)
+  assert.equal(LIVE_SEARCH_DOMAINS.includes("flightglobal.com"), true)
+  assert.equal(LIVE_SEARCH_DOMAINS.includes("aviationweek.com"), true)
+  assert.equal(LIVE_SEARCH_DOMAINS.includes("faa.gov"), true)
+
+  const request = liveSearchRequest(LIVE_SEARCH_QUERIES[0])
+  assert.deepEqual(request.sources, ["news", "web"])
+  assert.equal(request.tbs, "sbd:1,qdr:d")
+  assert.equal(request.includeDomains, LIVE_SEARCH_DOMAINS)
+})
+
+test("live search results are attributed, cleaned, deduplicated, and domain restricted", () => {
+  const results = extractLiveSearchCandidates({
+    data: {
+      news: [
+        { url: "https://www.reuters.com/business/aerospace-defense/aircraft-order-2026-07-15/?utm_source=test" },
+        { url: "https://www.reuters.com/business/aerospace-defense/aircraft-order-2026-07-15/" },
+        { url: "https://example.com/aviation-story" },
+      ],
+      web: [
+        { metadata: { sourceURL: "https://www.flightglobal.com/airlines/new-airline-development/160000.article" } },
+        { url: "https://www.faa.gov/newsroom/statements/accident_incidents/new-statement" },
+      ],
+    },
+  })
+
+  assert.deepEqual(results, [
+    {
+      source: "Reuters",
+      url: "https://www.reuters.com/business/aerospace-defense/aircraft-order-2026-07-15/",
+    },
+    {
+      source: "FlightGlobal",
+      url: "https://www.flightglobal.com/airlines/new-airline-development/160000.article",
+    },
+    {
+      source: "FAA Accident and Incident Statements",
+      url: "https://www.faa.gov/newsroom/statements/accident_incidents/new-statement",
+    },
+  ])
+  assert.equal(sourceNameForUrl("https://aviationweek.com/air-transport/example"), "Aviation Week")
+  assert.equal(sourceNameForUrl("https://unconfigured.example/aviation"), undefined)
 })
 
 test("extractStoryLinks keeps publisher articles and rejects unrelated links", () => {

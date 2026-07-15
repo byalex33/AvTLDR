@@ -17,6 +17,9 @@ const ARCHIVE_PREFIX = "avtldr/archive/"
 const HISTORY_PATH = "avtldr/story-history.json"
 const DIAGNOSTICS_PATH = "avtldr/refresh-diagnostics.json"
 const LINKS_PER_SOURCE = 3
+const LIVE_SEARCH_RESULTS_PER_QUERY = 12
+const MAX_LIVE_SEARCH_CANDIDATES = 60
+const MAX_ARTICLE_CANDIDATES = 120
 const MIN_EDITION_STORIES = 12
 const MAX_EDITION_STORIES = 16
 const NORMAL_RECENCY_HOURS = 24
@@ -83,6 +86,26 @@ const sources: readonly { name: string; url: string; direct?: boolean }[] = [
   { name: "London City Airport", url: "https://www.londoncityairport.com/media-centre" },
 ]
 
+export const LIVE_SEARCH_QUERIES = [
+  "aviation safety airline incident aircraft accident airspace regulation FAA EASA NTSB",
+  "airline airport routes merger earnings disruption aviation news",
+  "aircraft aerospace Boeing Airbus engine manufacturing orders deliveries certification",
+  "military aviation defense aircraft drones aerospace technology",
+] as const
+
+const sourceMatchers = sources
+  .map((source) => {
+    const url = new URL(source.url)
+    return {
+      name: source.name,
+      hostname: url.hostname.replace(/^www\./, "").toLowerCase(),
+      pathname: url.pathname.replace(/\/$/, ""),
+    }
+  })
+  .toSorted((a, b) => b.pathname.length - a.pathname.length)
+
+export const LIVE_SEARCH_DOMAINS = [...new Set(sourceMatchers.map(({ hostname }) => hostname))]
+
 type ScrapedPage = {
   source: string
   title: string
@@ -117,6 +140,9 @@ export type RefreshDiagnostics = {
   sourcePagesRequested: number
   sourcePagesScraped: number
   sourcePageFailures: number
+  searchQueriesRequested: number
+  searchQueriesSucceeded: number
+  searchCandidatesDiscovered: number
   candidateLinksDiscovered: number
   articlePagesRequested: number
   articlePagesScraped: number
@@ -233,14 +259,25 @@ export async function refreshNews({ dryRun = false }: { dryRun?: boolean } = {})
     const geminiKey = requiredEnv("GEMINI_API_KEY")
     const history = await loadStoryHistory()
 
-    const homepages = await runLimited(sources, 6, async (source) => ({
-      ...(await scrape(source.url, source.name, firecrawlKey, false)),
-      direct: source.direct,
-    }))
+    const [homepages, liveSearchResults] = await Promise.all([
+      runLimited(sources, 6, async (source) => ({
+        ...(await scrape(source.url, source.name, firecrawlKey, false)),
+        direct: source.direct,
+      })),
+      runLimited(LIVE_SEARCH_QUERIES, 2, (query) => searchLiveNews(query, firecrawlKey)),
+    ])
     diagnostics.sourcePagesScraped = homepages.length
     diagnostics.sourcePageFailures = diagnostics.sourcePagesRequested - homepages.length
+    diagnostics.searchQueriesSucceeded = liveSearchResults.length
 
     const candidateMap = new Map<string, { source: string; url: string }>()
+    const liveSearchCandidates = liveSearchResults.flat().slice(0, MAX_LIVE_SEARCH_CANDIDATES)
+    diagnostics.searchCandidatesDiscovered = new Set(
+      liveSearchCandidates.map(({ url }) => canonicalStoryUrl(url) || url),
+    ).size
+    for (const candidate of liveSearchCandidates) {
+      candidateMap.set(canonicalStoryUrl(candidate.url) || candidate.url, candidate)
+    }
     for (const page of homepages) {
       const links = page.direct
         ? extractDirectStoryLinks(page.markdown, page.url)
@@ -249,8 +286,8 @@ export async function refreshNews({ dryRun = false }: { dryRun?: boolean } = {})
         candidateMap.set(canonicalStoryUrl(url) || url, { source: page.source, url })
       }
     }
-    const candidates = [...candidateMap.values()]
-    diagnostics.candidateLinksDiscovered = candidates.length
+    diagnostics.candidateLinksDiscovered = candidateMap.size
+    const candidates = [...candidateMap.values()].slice(0, MAX_ARTICLE_CANDIDATES)
     diagnostics.articlePagesRequested = candidates.length
 
     if (!candidates.length) throw new Error("No article links found")
@@ -344,6 +381,9 @@ function createRefreshDiagnostics(startedAt: Date, dryRun: boolean): RefreshDiag
     sourcePagesRequested: sources.length,
     sourcePagesScraped: 0,
     sourcePageFailures: 0,
+    searchQueriesRequested: LIVE_SEARCH_QUERIES.length,
+    searchQueriesSucceeded: 0,
+    searchCandidatesDiscovered: 0,
     candidateLinksDiscovered: 0,
     articlePagesRequested: 0,
     articlePagesScraped: 0,
@@ -387,6 +427,87 @@ export async function loadRefreshDiagnostics() {
   } catch {
     return undefined
   }
+}
+
+export function liveSearchRequest(query: string) {
+  return {
+    query,
+    limit: LIVE_SEARCH_RESULTS_PER_QUERY,
+    sources: ["news", "web"],
+    includeDomains: LIVE_SEARCH_DOMAINS,
+    tbs: "sbd:1,qdr:d",
+    country: "UK",
+    timeout: 30_000,
+    ignoreInvalidURLs: true,
+  }
+}
+
+export function sourceNameForUrl(value: string) {
+  try {
+    const url = new URL(value)
+    const hostname = url.hostname.replace(/^www\./, "").toLowerCase()
+    const exactPath = sourceMatchers.find(({ hostname: sourceHost, pathname }) => (
+      hostname === sourceHost && pathname && url.pathname.startsWith(pathname)
+    ))
+    return exactPath?.name ?? sourceMatchers.find(({ hostname: sourceHost }) => hostname === sourceHost)?.name
+  } catch {
+    return undefined
+  }
+}
+
+export function extractLiveSearchCandidates(payload: unknown) {
+  if (!payload || typeof payload !== "object") return []
+  const data = (payload as { data?: unknown }).data
+  const collections = Array.isArray(data)
+    ? [data]
+    : data && typeof data === "object"
+      ? [
+          (data as { news?: unknown }).news,
+          (data as { web?: unknown }).web,
+        ].filter(Array.isArray)
+      : []
+  const candidates = new Map<string, { source: string; url: string }>()
+
+  for (const result of collections.flat()) {
+    if (!result || typeof result !== "object") continue
+    const record = result as {
+      url?: unknown
+      metadata?: { sourceURL?: unknown; url?: unknown }
+    }
+    const value = [record.url, record.metadata?.sourceURL, record.metadata?.url]
+      .find((candidate): candidate is string => typeof candidate === "string")
+    if (!value) continue
+
+    try {
+      const url = new URL(value)
+      url.hash = ""
+      for (const key of [...url.searchParams.keys()]) {
+        if (/^utm_|^(?:fbclid|gclid)$/i.test(key)) url.searchParams.delete(key)
+      }
+      const source = sourceNameForUrl(url.toString())
+      if (!source) continue
+      const normalizedUrl = url.toString()
+      candidates.set(canonicalStoryUrl(normalizedUrl) || normalizedUrl, { source, url: normalizedUrl })
+    } catch {
+      // Ignore malformed or unsupported search results.
+    }
+  }
+
+  return [...candidates.values()]
+}
+
+async function searchLiveNews(query: string, apiKey: string) {
+  const response = await fetchWithTimeout("https://api.firecrawl.dev/v2/search", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(liveSearchRequest(query)),
+  }, 40_000)
+
+  if (!response.ok) throw new Error(`Firecrawl search failed: ${response.status}`)
+  return extractLiveSearchCandidates(await response.json())
 }
 
 export function extractStoryLinks(markdown: string, homepage: string) {
