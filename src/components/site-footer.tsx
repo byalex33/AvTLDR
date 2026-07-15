@@ -1,4 +1,5 @@
 import Link from "next/link"
+import { Show } from "@clerk/nextjs"
 
 export function SiteFooter() {
   return (
@@ -30,6 +31,9 @@ export function SiteFooter() {
               <Link className="hover:text-white hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary" href="/methodology">Methodology &amp; corrections</Link>
               <Link className="hover:text-white hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary" href="/archive">Daily archive</Link>
               <Link className="hover:text-white hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary" href="/pro">AvTLDR Pro</Link>
+              <Show when="signed-in" fallback={<><Link className="hover:text-white hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary" href="/sign-in">Log in</Link><Link className="hover:text-white hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary" href="/sign-up">Sign up</Link></>}>
+                <Link className="hover:text-white hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary" href="/account">Your account</Link>
+              </Show>
               <a className="hover:text-white hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary" href="/feed.xml">RSS feed</a>
             </div>
           </nav>

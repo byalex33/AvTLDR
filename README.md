@@ -20,6 +20,15 @@ Copy `.env.example` to `.env.local` and provide:
 - `CRON_SECRET`
 - `BLOB_READ_WRITE_TOKEN` from a Vercel Blob store
 - `RESEND_API_KEY` with full access for contact-form delivery and newsletter signups
+- `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` and `CLERK_SECRET_KEY` from Clerk
+- `ADMIN_USER_IDS`, a comma-separated list of Clerk user IDs allowed to open `/admin`
+- `STRIPE_SECRET_KEY`, `STRIPE_PRO_PRICE_ID`, `STRIPE_PRO_YEARLY_PRICE_ID`, and `STRIPE_WEBHOOK_SECRET` for the monthly and yearly recurring GBP Pro prices
+
+Send `checkout.session.completed`, `customer.subscription.updated`, `customer.subscription.deleted`, `invoice.paid`, and `invoice.payment_failed` to `/api/stripe/webhook`, and enable the Stripe Customer Portal. The webhook uses the private Vercel Blob store for durable event deduplication, so production billing requires that store.
+
+Activate Stripe Tax, add the jurisdictions where the business is registered to collect tax, and assign the Pro product the appropriate digital-news/service tax code. Checkout calculates tax from the customer's location, collects tax IDs, and adds tax on top of the exclusive monthly and yearly prices.
+
+Pro access follows `active`, `trialing`, and `past_due` subscriptions. `past_due` is the payment-recovery grace period and lasts until Stripe's retry policy moves the subscription to another status. `unpaid` customers lose Pro content access but keep Customer Portal access to recover billing. Complimentary access can also be granted in `/admin`, and Clerk Billing features with the slug `pro` are accepted. Preferences, bookmarks, and saved searches use the existing private Vercel Blob store.
 
 Vercel calls `/api/cron` daily at 06:00 UTC. The endpoint inspects up to three article links per publisher, sends the qualifying batch to Gemini, validates the result, stores `avtldr/stories.json`, and revalidates the homepage. An edition is published only when 12–16 stories qualify; otherwise, the previous complete edition remains live. Each run also stores its filtering and selection counts in `avtldr/refresh-diagnostics.json`.
 

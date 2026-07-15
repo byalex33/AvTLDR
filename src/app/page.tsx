@@ -1,9 +1,10 @@
 import Link from "next/link"
+import { Show, UserButton } from "@clerk/nextjs"
 import { Plane } from "lucide-react"
 
 import { NewsFeed } from "@/components/news-feed"
 import { UpdateCountdown } from "@/components/update-countdown"
-import { editionDay, formatEditionDate, formatEditionTimestamp, loadEdition } from "@/lib/news"
+import { editionDay, loadEdition } from "@/lib/news"
 import { SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/seo"
 import { stories } from "@/lib/stories"
 
@@ -40,7 +41,6 @@ const jsonLd = [
 
 export default async function Home() {
   const edition = await loadEdition(stories)
-  const editionDate = formatEditionDate(edition.generatedAt)
 
   return (
     <div className="min-h-screen bg-background">
@@ -52,7 +52,7 @@ export default async function Home() {
         <div className="bg-slate-950 text-white">
           <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-2 text-[0.68rem] font-semibold uppercase tracking-[0.12em] sm:px-6 sm:tracking-[0.18em] lg:px-8">
             <p className="hidden sm:block">Aviation intelligence, distilled daily</p>
-            <div className="flex w-full items-center justify-between gap-5 sm:w-auto sm:justify-end">
+            <div className="flex w-full items-center justify-between gap-4 sm:w-auto sm:justify-end">
               <Link href="/pro" className="text-primary hover:text-white hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
                 Become Pro
               </Link>
@@ -73,10 +73,15 @@ export default async function Home() {
               Av<span className="text-primary">TLDR</span>
             </span>
           </Link>
-          <div className="min-w-0 text-right">
-            <p className="text-[0.65rem] font-bold uppercase tracking-[0.18em] text-muted-foreground">Today&apos;s edition</p>
-            <p className="mt-1 text-sm font-semibold">{editionDate}</p>
-            <p className="mt-1 text-xs text-muted-foreground">Updated {formatEditionTimestamp(edition.generatedAt)}</p>
+          <div className="flex min-h-11 items-center gap-3 text-xs font-bold uppercase tracking-[0.1em]">
+            <Show when="signed-out">
+              <Link href="/sign-in" className="hover:text-primary hover:underline">Log in</Link>
+              <Link href="/sign-up" className="bg-primary px-3 py-2 text-primary-foreground hover:bg-foreground">Sign up</Link>
+            </Show>
+            <Show when="signed-in">
+              <Link href="/account" className="hover:text-primary hover:underline">Your account</Link>
+              <UserButton />
+            </Show>
           </div>
         </div>
       </header>

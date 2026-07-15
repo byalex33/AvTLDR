@@ -1,4 +1,5 @@
 import type { Metadata } from "next"
+import { auth } from "@clerk/nextjs/server"
 import Link from "next/link"
 import { ArrowRight, Check, Minus, Plane } from "lucide-react"
 
@@ -6,7 +7,7 @@ import { pageMetadata } from "@/lib/seo"
 
 export const metadata: Metadata = pageMetadata(
   "AvTLDR Pro — aviation briefing tools",
-  "Compare AvTLDR Free and Pro, with archive search, saved research, custom briefings, and exports for £6 per month.",
+  "Compare AvTLDR Free and Pro, with archive search, saved research, custom briefings, and exports for £6 per month or £60 per year.",
   "/pro",
 )
 
@@ -21,7 +22,8 @@ const comparisonRows = [
   { feature: "PDF and CSV exports", free: false, pro: true },
 ] as const
 
-export default function ProPage() {
+export default async function ProPage() {
+  const { userId } = await auth()
   return (
     <main>
       <section className="mx-auto max-w-6xl px-4 pb-16 pt-10 sm:px-6 sm:pb-24 sm:pt-16">
@@ -37,7 +39,7 @@ export default function ProPage() {
                     AvTLDR <span className="text-primary">Pro</span>
                   </span>
                 </span>
-                <span className="text-[0.68rem] font-bold uppercase tracking-[0.18em] text-white/50">Boarding soon</span>
+                <span className="text-[0.68rem] font-bold uppercase tracking-[0.18em] text-white/50">Now boarding</span>
               </div>
               <h1 className="mt-7 font-serif text-5xl font-bold leading-[0.98] tracking-[-0.05em] text-balance sm:text-7xl">
                 Your corner of aviation, cleared for take-off.
@@ -59,20 +61,20 @@ export default function ProPage() {
             <div className="border border-white/15 bg-slate-950/55 p-6 sm:p-8">
               <div className="flex items-center justify-between gap-4 border-b border-white/15 pb-5">
                 <div>
-                  <p className="text-[0.68rem] font-bold uppercase tracking-[0.18em] text-primary">Briefing settings</p>
-                  <p className="mt-2 font-serif text-2xl font-bold">Wednesday briefing</p>
+                  <p className="text-[0.68rem] font-bold uppercase tracking-[0.18em] text-primary">Your Pro toolkit</p>
+                  <p className="mt-2 font-serif text-2xl font-bold">Research dashboard</p>
                 </div>
-                <span className="font-mono text-xs text-white/40">06:00 BST</span>
+                <span className="font-mono text-xs text-white/40">Every edition</span>
               </div>
 
               <div className="divide-y divide-white/10">
-                <PreferenceItem name="Topic order" value="Custom" />
-                <PreferenceItem name="Military news" value="Hidden" />
-                <PreferenceItem name="Edition length" value="Concise" />
+                <PreferenceItem name="Topics" value="Custom" />
+                <PreferenceItem name="Publishers" value="Custom" />
+                <PreferenceItem name="Exports" value="PDF + CSV" />
               </div>
 
               <div className="mt-7 border-l-2 border-primary bg-white/[0.055] px-4 py-3">
-                <p className="text-sm font-semibold leading-6 text-white/75">Your preferred briefing is ready to read.</p>
+                <p className="text-sm font-semibold leading-6 text-white/75">Your custom briefing and research tools are ready.</p>
               </div>
             </div>
 
@@ -80,6 +82,7 @@ export default function ProPage() {
               <div>
                 <p className="text-[0.68rem] font-bold uppercase tracking-[0.18em] text-white/45">One simple plan</p>
                 <p className="mt-2 font-serif text-5xl font-bold">£6 <span className="font-sans text-sm font-medium text-white/45">/ month</span></p>
+                <p className="mt-2 text-sm font-bold text-primary">£60 / year · 2 months free</p>
               </div>
               <p className="max-w-32 text-right text-xs leading-5 text-white/45">Cancel whenever you like.</p>
             </div>
@@ -107,7 +110,7 @@ export default function ProPage() {
                   <p className="mt-2 font-serif text-2xl font-bold">What&apos;s included</p>
                 </div>
                 <PlanHeading name="Free" price="£0" description="The global essentials" />
-                <PlanHeading name="Pro" price="£6" description="Advanced briefing tools" featured />
+                <PlanHeading name="Pro" price="£6" description="Or £60/year · 2 months free" featured />
               </div>
 
               <div>
@@ -136,14 +139,20 @@ export default function ProPage() {
                   </Link>
                 </div>
                 <div className="flex items-center justify-center border-l border-slate-700 bg-slate-950 p-5 text-white">
-                  <span className="inline-flex min-h-11 items-center justify-center bg-primary px-4 py-2 text-xs font-black uppercase tracking-[0.1em] text-primary-foreground">
-                    Coming soon
-                  </span>
+                  {userId ? (
+                    <form action="/api/stripe/checkout" method="post" className="grid w-full gap-2">
+                      <button name="billing" value="monthly" className="inline-flex min-h-11 w-full items-center justify-center bg-primary px-3 py-2 text-xs font-black uppercase tracking-[0.1em] text-primary-foreground">£6 monthly</button>
+                      <button name="billing" value="yearly" className="inline-flex min-h-11 w-full items-center justify-center border border-primary px-3 py-2 text-xs font-black uppercase tracking-[0.1em] text-primary">£60 yearly</button>
+                      <p className="text-center text-[0.65rem] font-bold uppercase tracking-[0.08em] text-white/55">2 months free yearly</p>
+                    </form>
+                  ) : (
+                    <Link href="/sign-up" className="inline-flex min-h-11 items-center justify-center bg-primary px-4 py-2 text-xs font-black uppercase tracking-[0.1em] text-primary-foreground">Create Pro account</Link>
+                  )}
                 </div>
               </div>
             </div>
           </div>
-          <p className="mt-4 text-xs leading-5 text-muted-foreground sm:text-right">Prices shown in GBP. Pro will be billed monthly.</p>
+          <p className="mt-4 text-xs leading-5 text-muted-foreground sm:text-right">Prices shown in GBP. Choose £6 monthly or £60 yearly.</p>
         </div>
       </section>
     </main>

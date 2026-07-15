@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next"
+import { ClerkProvider } from "@clerk/nextjs"
 
 import { SiteFooter } from "@/components/site-footer"
 import { EDITORIAL_NAME, SITE_DESCRIPTION, SITE_URL } from "@/lib/seo"
@@ -62,11 +63,13 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en-GB" className="h-full antialiased">
-      <body className="min-h-full">
-        {children}
-        <SiteFooter />
-      </body>
-    </html>
+    <ClerkProvider signInUrl="/sign-in" signUpUrl="/sign-up" signInFallbackRedirectUrl="/account" signUpFallbackRedirectUrl="/pro">
+      <html lang="en-GB" className="h-full antialiased">
+        <body className="min-h-full">
+          {children}
+          <SiteFooter />
+        </body>
+      </html>
+    </ClerkProvider>
   )
 }

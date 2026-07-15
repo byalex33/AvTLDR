@@ -13,7 +13,7 @@ export default function TermsPage() {
     <main className="mx-auto max-w-3xl px-4 py-16 sm:px-6 sm:py-24">
       <p className="text-xs font-bold uppercase tracking-[0.18em] text-primary">The small print</p>
       <h1 className="mt-3 font-serif text-4xl font-bold tracking-[-0.04em] sm:text-6xl">Terms of use</h1>
-      <p className="mt-4 text-sm text-muted-foreground">Last updated 14 July 2026</p>
+      <p className="mt-4 text-sm text-muted-foreground">Last updated 15 July 2026</p>
 
       <div className="mt-12 space-y-9 text-base leading-8 text-foreground/80">
         <section>
@@ -27,6 +27,10 @@ export default function TermsPage() {
         <section>
           <h2 className="font-serif text-2xl font-bold text-foreground">Acceptable use</h2>
           <p className="mt-3">You may use the site for lawful, personal purposes. Do not interfere with the service, attempt unauthorised access, scrape it in a way that harms availability, or present our summaries as your own reporting.</p>
+        </section>
+        <section>
+          <h2 className="font-serif text-2xl font-bold text-foreground">Pro subscriptions</h2>
+          <p className="mt-3">AvTLDR Pro is billed monthly or yearly through Stripe at the price shown before checkout. You can manage or cancel renewal from your account; cancellation takes effect at the end of the paid billing period. Your statutory consumer rights are unaffected.</p>
         </section>
         <section>
           <h2 className="font-serif text-2xl font-bold text-foreground">Availability and liability</h2>
